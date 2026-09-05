@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUF EnrollFlow Assist</title>
+<meta name="description" content="Ask a question about the Angeles University Foundation new student enrollment process and get the answer straight from the official guidelines.">
+<link rel="icon" href="assets/auf-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#assist">Skip to Ask Assist</a>
+
+<!-- Header band: navy panel, building photo behind it, hero + search inside -->
+<header class="band" id="home">
+  <div class="band__photo" aria-hidden="true"></div>
+
+  <div class="band__inner">
+    <div class="masthead">
+      <a class="brand" href="#home">
+        <img class="brand__seal" src="assets/auf-logo.png" alt="" width="56" height="56">
+        <span class="brand__rule" aria-hidden="true"></span>
+        <span class="brand__text">
+          <span class="brand__name">Angeles University<br>Foundation</span>
+          <span class="brand__sub">Enrollment<br>Service</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__link is-active" href="#home">Home</a>
+        <a class="nav__link" href="#guide">Enrollment Guide</a>
+        <a class="nav__link" href="#assist">Ask Assist</a>
+        <a class="nav__link" href="#faqs">FAQs</a>
+      </nav>
+    </div>
+
+    <div class="hero">
+      <p class="hero__eyebrow">AI Assistance</p>
+      <h1 class="hero__title">How can we help you enroll?</h1>
+      <p class="hero__sub">Ask a question about the AUF new student enrollment process</p>
+    </div>
+  </div>
+
+  <!-- Overlaps the bottom edge of the band -->
+  <form class="search" id="ask-form" role="search" autocomplete="off">
+    <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="10.5" cy="10.5" r="6.75"/><path d="M15.6 15.6 21 21"/>
+    </svg>
+    <label class="sr-only" for="ask-input">Your question about enrolling</label>
+    <input class="search__input" id="ask-input" name="question" type="search"
+           placeholder="Type your question…" enterkeyhint="search">
+    <button class="btn-gold" type="submit" id="ask-button">Ask Assist</button>
+  </form>
+</header>
+
+<main>
+  <!-- Quick-pick questions -->
+  <section class="chips" aria-labelledby="chips-label">
+    <p class="chips__label" id="chips-label">Frequent asked question:</p>
+    <ul class="chips__list" id="chips-list"></ul>
+  </section>
+
+  <!-- Answer surface. Populated by app.js; hidden until the first question. -->
+  <section class="section" id="assist" aria-labelledby="assist-heading">
+    <h2 class="sr-only" id="assist-heading">Ask Assist answer</h2>
+    <div class="answer" id="answer" aria-live="polite" hidden></div>
+  </section>
+
+  <section class="section" id="guide" aria-labelledby="guide-heading">
+    <h2 class="section__title" id="guide-heading">Procedure for enrolling</h2>
+    <ol class="steps" id="steps"></ol>
+  </section>
+
+  <section class="section" id="dress-code" aria-labelledby="dress-heading">
+    <h2 class="section__title" id="dress-heading">Dress Code</h2>
+    <div class="card card--wide">
+      <p class="dress__intro" id="dress-intro"></p>
+      <p class="dress__label">Strictly prohibited on campus</p>
+      <ul class="dress__list" id="dress-list"></ul>
+      <p class="dress__note" id="dress-note"></p>
+    </div>
+  </section>
+
+  <section class="section" id="faqs" aria-labelledby="faqs-heading">
+    <h2 class="section__title" id="faqs-heading">FAQs</h2>
+    <div class="faqs" id="faq-list"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <p class="footer__title">AUF EnrollFlow Assist</p>
+    <p class="footer__note">
+      Answers are extracted from the official AUF New Student Enrollment Guidelines.
+      For anything not covered here, visit
+      <a href="https://www.auf.edu.ph/" target="_blank" rel="noopener">auf.edu.ph</a>.
+    </p>
+    <p class="footer__note footer__note--muted">
+      PTF50 — Professional Track 5: Web-Based AI Development · Applied Activity: Pre-Trained Models
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

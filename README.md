@@ -28,12 +28,39 @@ The app pre-loads the official **AUF New Student Enrollment Guidelines** as its 
 
 1. Student opens the EnrollFlow Assist page and sees a search bar under "How can we help you enroll?"
 2. Student types a question (or taps a quick FAQ chip, e.g. "How much?", "Is the office open on Saturday?") and hits **Ask Assist**.
-3. MobileBERT QnA runs in-browser against the pre-loaded enrollment guidelines passage and returns the answer span.
+3. MobileBERT QnA runs in-browser against the pre-loaded enrollment guidelines passage and returns the answer span, shown with its confidence and the source sentence highlighted inside the passage.
 4. The app displays the extracted answer, plus a reference "Procedure for enrolling" step cards and a "Dress Code" panel for quick browsing without needing to ask.
 
 ### Who benefits
 
 New/incoming AUF students during peak enrollment — reducing repeat questions to the Registrar, Cashier, and Learning Commons front-line staff by letting students self-serve answers already published in the guidelines.
+
+## Project layout
+
+```
+index.html          single page; nav anchors to #home, #assist, #guide, #faqs
+css/styles.css      design tokens + components
+js/data.js          STEPS, DRESS_CODE, CHIPS, FAQS, PASSAGE — all page content
+js/qna.js           answer() / warmup() — the model seam
+js/app.js           rendering + event wiring
+assets/             AUF seal, Angeles Hall photo
+```
+
+Run it with VS Code Live Server, or `python -m http.server 5500` and open
+<http://localhost:5500>. No build step and no dependencies.
+
+## Wiring in MobileBERT QnA
+
+`js/qna.js` is the only file that changes. It currently answers with a
+keyword-overlap stub so the full UI — loading, answer, no-match, and error
+states — is already built and exercised. It exports the same shape the real
+model returns (`{ text, score, startIndex, endIndex }`), so integration is:
+
+1. Add the `tfjs` and `@tensorflow-models/qna` script tags to `index.html`.
+2. `warmup()` → `model = await qna.load();`
+3. `answer()` → `const [best] = await model.findAnswers(question, passage); return best ?? null;`
+
+`js/app.js` never learns which one produced the result.
 
 ## Tech stack
 
@@ -47,4 +74,6 @@ New/incoming AUF students during peak enrollment — reducing repeat questions t
 
 ## Status
 
-Concept and content defined; app UI not yet implemented.
+UI implemented and verified end to end — the seven step cards, dress code
+panel, FAQ accordion, quick-pick chips, and the full ask flow all run against
+the stub. Next: swap the stub in `js/qna.js` for MobileBERT QnA.
