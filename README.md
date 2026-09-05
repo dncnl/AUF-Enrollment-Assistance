@@ -1,8 +1,8 @@
-# AUF EnrollFlow Assist
+# AUF Enrollment Assist
 
 A browser-based enrollment assistant for Angeles University Foundation, built for **PTF50 — Professional Track 5: Web-Based AI Development** (Applied Activity: Pre-Trained Models).
 
-## Concept 1: AUF EnrollFlow Assist
+## Concept 1: AUF Enrollment Assist
 
 **Chosen model:** MobileBERT QnA (`@tensorflow-models/qna`)
 **Reads:** a text passage + a typed question
@@ -38,13 +38,19 @@ New/incoming AUF students during peak enrollment — reducing repeat questions t
 ## Project layout
 
 ```
-index.html          single page; nav anchors to #home, #assist, #guide, #faqs
-css/styles.css      design tokens + components
-js/data.js          STEPS, DRESS_CODE, CHIPS, FAQS, PASSAGE — all page content
+index.html          single page; sections #home #assist #guide #campus #faqs
+css/styles.css      design tokens + components (mobile-first)
+js/data.js          BUILDINGS, STEPS, TRIPS, DRESS_CODE, CHIPS, FAQS, PASSAGE
 js/qna.js           answer() / warmup() — the model seam
+js/campus.js        campus wayfinding: maps links + schematic map
+js/progress.js      per-browser step completion (localStorage, guarded)
+js/dom.js           escapeHtml + the outline icon set
 js/app.js           rendering + event wiring
 assets/             AUF seal, Angeles Hall photo
 ```
+
+Navigation is a bottom tab bar on mobile and a sticky section rail on desktop;
+both render from the one `NAV` array in `js/app.js`.
 
 Run it with VS Code Live Server, or `python -m http.server 5500` and open
 <http://localhost:5500>. No build step and no dependencies.
@@ -57,8 +63,13 @@ states — is already built and exercised. It exports the same shape the real
 model returns (`{ text, score, startIndex, endIndex }`), so integration is:
 
 1. Add the `tfjs` and `@tensorflow-models/qna` script tags to `index.html`.
-2. `warmup()` → `model = await qna.load();`
+2. `warmup(onProgress)` → `model = await qna.load();`, forwarding tf's loading
+   progress to `onProgress`, and set `MODEL_INFO.needsDownload = true`.
 3. `answer()` → `const [best] = await model.findAnswers(question, passage); return best ?? null;`
+
+Setting `needsDownload` flips the UI to its metered-connection behaviour: it
+states the ~103 MB cost up front and defers the load to the first question
+instead of spending a student's data on page load.
 
 `js/app.js` never learns which one produced the result.
 
@@ -69,11 +80,29 @@ model returns (`{ text, score, startIndex, endIndex }`), so integration is:
 
 ## Design reference
 
-- **Palette:** Primary Base `#0C2340`, Primary Accent `#C5A059`, Tech Accent `#38BDF8`
-- **Typography:** Montserrat (Bold headers / SemiBold sub-headers), Poppins (body text)
+- **Palette:** Primary Base `#0C2340`, Primary Accent `#C5A059`.
+  Gold only carries text on dark surfaces — on white it measures 2.46:1, so
+  `--gold-ink` `#87692F` and `--gold-line` `#AB853C` cover light surfaces.
+  Focus rings are navy on light and gold on navy; no shade of the old
+  `#38BDF8` clears 3:1 against both the card and the page, so it is now used
+  only as the answer-highlight fill.
+- **Typography:** Fraunces (display and headings), League Spartan at −5%
+  tracking (labels, nav, buttons — the UI voice), Poppins (body prose).
+- **Layout:** mobile-first. The seven steps are one vertical timeline at every
+  width — a grid of equal cards reads as a list, not a flow.
 
 ## Status
 
-UI implemented and verified end to end — the seven step cards, dress code
-panel, FAQ accordion, quick-pick chips, and the full ask flow all run against
-the stub. Next: swap the stub in `js/qna.js` for MobileBERT QnA.
+UI implemented against the stub: the step timeline with progress tracking,
+campus wayfinding, dress code, FAQ accordion, quick-pick chips, and the full
+ask flow (loading, answer, low-confidence, no-match, error). Contrast is
+verified — every text pair ≥4.5:1 and every focus ring and boundary ≥3:1.
+
+Two things outstanding:
+
+1. **Campus layout.** `BUILDINGS` in `js/data.js` carries `x`/`y` of `null`.
+   While they are null the Campus section renders the building list and its
+   directions links and omits the schematic map — it never guesses a pin
+   position. Fill in real coordinates (as a percentage of the map viewBox) and
+   add `assets/campus-map.png` to switch the map on.
+2. **The model.** Swap the stub in `js/qna.js` for MobileBERT QnA.

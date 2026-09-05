@@ -2,93 +2,123 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AUF EnrollFlow Assist</title>
 <meta name="description" content="Ask a question about the Angeles University Foundation new student enrollment process and get the answer straight from the official guidelines.">
+<meta name="theme-color" content="#0c2340">
 <link rel="icon" href="assets/auf-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=League+Spartan:wght@400;500;600;700&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-<a class="skip-link" href="#assist">Skip to Ask Assist</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<!-- Header band: navy panel, building photo behind it, hero + search inside -->
-<header class="band" id="home">
-  <div class="band__photo" aria-hidden="true"></div>
+<!-- Full-bleed navy opening: brand, the question, and the answer box. -->
+<header class="hero" id="home">
+  <div class="hero__photo" aria-hidden="true"></div>
 
-  <div class="band__inner">
-    <div class="masthead">
-      <a class="brand" href="#home">
-        <img class="brand__seal" src="assets/auf-logo.png" alt="" width="56" height="56">
-        <span class="brand__rule" aria-hidden="true"></span>
-        <span class="brand__text">
-          <span class="brand__name">Angeles University<br>Foundation</span>
-          <span class="brand__sub">Enrollment<br>Service</span>
-        </span>
-      </a>
+  <div class="hero__inner">
+    <a class="brand" href="#home">
+      <img class="brand__seal" src="assets/auf-logo.png" alt="" width="44" height="44">
+      <span class="brand__text">
+        <span class="brand__name">Angeles University Foundation</span>
+        <span class="brand__sub">Enrollment Service</span>
+      </span>
+    </a>
 
-      <nav class="nav" aria-label="Primary">
-        <a class="nav__link is-active" href="#home">Home</a>
-        <a class="nav__link" href="#guide">Enrollment Guide</a>
-        <a class="nav__link" href="#assist">Ask Assist</a>
-        <a class="nav__link" href="#faqs">FAQs</a>
-      </nav>
-    </div>
+    <p class="hero__eyebrow">Enrollment assistant</p>
+    <h1 class="hero__title">How can we help you enroll?</h1>
+    <p class="hero__sub">Seven steps, four buildings, one place to ask. Answers come straight from the official AUF guidelines.</p>
 
-    <div class="hero">
-      <p class="hero__eyebrow">AI Assistance</p>
-      <h1 class="hero__title">How can we help you enroll?</h1>
-      <p class="hero__sub">Ask a question about the AUF new student enrollment process</p>
+    <form class="search" id="ask-form" role="search" autocomplete="off">
+      <label class="sr-only" for="ask-input">Your question about enrolling</label>
+      <div class="search__field">
+        <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"
+             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="10.5" cy="10.5" r="6.75"/><path d="M15.6 15.6 21 21"/>
+        </svg>
+        <input class="search__input" id="ask-input" name="question" type="search"
+               placeholder="Type your question…" enterkeyhint="search">
+      </div>
+      <button class="btn btn--gold" type="submit" id="ask-button">Ask Assist</button>
+    </form>
+
+    <p class="modelstate" id="model-state" role="status" hidden></p>
+
+    <div class="quick">
+      <p class="quick__label" id="chips-label">Or try one of these</p>
+      <ul class="quick__list" id="chips-list" aria-labelledby="chips-label"></ul>
     </div>
   </div>
-
-  <!-- Overlaps the bottom edge of the band -->
-  <form class="search" id="ask-form" role="search" autocomplete="off">
-    <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="10.5" cy="10.5" r="6.75"/><path d="M15.6 15.6 21 21"/>
-    </svg>
-    <label class="sr-only" for="ask-input">Your question about enrolling</label>
-    <input class="search__input" id="ask-input" name="question" type="search"
-           placeholder="Type your question…" enterkeyhint="search">
-    <button class="btn-gold" type="submit" id="ask-button">Ask Assist</button>
-  </form>
 </header>
 
-<main>
-  <!-- Quick-pick questions -->
-  <section class="chips" aria-labelledby="chips-label">
-    <p class="chips__label" id="chips-label">Frequent asked question:</p>
-    <ul class="chips__list" id="chips-list"></ul>
-  </section>
+<main id="main">
 
-  <!-- Answer surface. Populated by app.js; hidden until the first question. -->
-  <section class="section" id="assist" aria-labelledby="assist-heading">
-    <h2 class="sr-only" id="assist-heading">Ask Assist answer</h2>
-    <div class="answer" id="answer" aria-live="polite" hidden></div>
-  </section>
+  <!-- Desktop-only section rail. The bottom tab bar covers mobile. -->
+  <nav class="rail" aria-label="Sections">
+    <ol class="rail__list" id="rail"></ol>
+  </nav>
 
-  <section class="section" id="guide" aria-labelledby="guide-heading">
-    <h2 class="section__title" id="guide-heading">Procedure for enrolling</h2>
-    <ol class="steps" id="steps"></ol>
-  </section>
+  <div class="flow">
 
-  <section class="section" id="dress-code" aria-labelledby="dress-heading">
-    <h2 class="section__title" id="dress-heading">Dress Code</h2>
-    <div class="card card--wide">
+    <!-- Answer surface. Populated by app.js; hidden until the first question. -->
+    <section class="section" id="assist" aria-labelledby="assist-heading">
+      <h2 class="sr-only" id="assist-heading">Ask Assist answer</h2>
+      <div class="answer" id="answer" aria-live="polite" hidden></div>
+    </section>
+
+    <section class="section" id="guide" aria-labelledby="guide-heading">
+      <p class="section__eyebrow">Your enrollment</p>
+      <h2 class="section__title" id="guide-heading">Seven steps, in order</h2>
+      <p class="section__lede">Work down the list. Tick each step as you finish it — the next one you need is always highlighted.</p>
+
+      <div class="progress" id="progress"></div>
+      <ol class="steps" id="steps"></ol>
+    </section>
+
+    <section class="section" id="campus" aria-labelledby="campus-heading">
+      <p class="section__eyebrow">Where to go</p>
+      <h2 class="section__title" id="campus-heading">Finding your way around campus</h2>
+      <p class="section__lede">Every office you need during enrollment. Directions open in your phone’s maps app.</p>
+      <div id="campus-body"></div>
+    </section>
+
+    <section class="section" id="dress-code" aria-labelledby="dress-heading">
+      <p class="section__eyebrow">Before you go</p>
+      <h2 class="section__title" id="dress-heading">Dress code</h2>
       <p class="dress__intro" id="dress-intro"></p>
-      <p class="dress__label">Strictly prohibited on campus</p>
-      <ul class="dress__list" id="dress-list"></ul>
+      <p class="dress__label" id="dress-label">Strictly prohibited on campus</p>
+      <ul class="dress__list" id="dress-list" aria-labelledby="dress-label"></ul>
       <p class="dress__note" id="dress-note"></p>
-    </div>
-  </section>
+    </section>
 
-  <section class="section" id="faqs" aria-labelledby="faqs-heading">
-    <h2 class="section__title" id="faqs-heading">FAQs</h2>
-    <div class="faqs" id="faq-list"></div>
-  </section>
+    <section class="section" id="faqs" aria-labelledby="faqs-heading">
+      <p class="section__eyebrow">Quick answers</p>
+      <h2 class="section__title" id="faqs-heading">FAQs</h2>
+      <div class="faqs" id="faq-list"></div>
+    </section>
+
+    <!-- Escalation: what to do when this page cannot answer -->
+    <section class="section" id="help" aria-labelledby="help-heading">
+      <div class="escalate">
+        <p class="section__eyebrow">Beyond the guidelines</p>
+        <h2 class="escalate__title" id="help-heading">Still stuck?</h2>
+        <p class="escalate__text">
+          EnrollFlow Assist only answers from the official AUF New Student Enrollment
+          Guidelines. For anything outside them — deadlines, scholarships, or your own
+          records — ask the office handling that step, or check the university site.
+        </p>
+        <div class="escalate__actions">
+          <a class="btn btn--gold" href="https://www.auf.edu.ph/" target="_blank" rel="noopener">Visit auf.edu.ph</a>
+          <a class="btn btn--ghost" href="#campus">Find the right office</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </main>
 
 <footer class="footer">
@@ -104,6 +134,9 @@
     </p>
   </div>
 </footer>
+
+<!-- Thumb-reachable navigation. Mobile only; the rail takes over on desktop. -->
+<nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
 
 <script type="module" src="js/app.js"></script>
 </body>

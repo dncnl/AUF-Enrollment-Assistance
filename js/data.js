@@ -3,8 +3,61 @@
  *
  * PASSAGE is deliberately prose, not a table: MobileBERT QnA extracts an answer
  * span out of natural text, so the passage the model reads is the same material
- * the step cards render below it.
+ * the step cards render below it. Every fact rendered anywhere on the page must
+ * stay traceable to PASSAGE — that is what keeps the app honest.
  */
+
+/**
+ * The physical places a student has to visit.
+ *
+ * `mapQuery` is handed to Google Maps as a plain search string, so wayfinding
+ * needs no API key and no coordinates. `x`/`y` place the building's pin on the
+ * schematic campus map, as a percentage of that map's viewBox.
+ *
+ * TODO(layout): x and y are null until the real campus layout is supplied.
+ * While they are null the Campus section renders the building list and its
+ * directions links, and simply omits the schematic map. It never guesses a
+ * position — a wrong pin walks a freshman to the wrong building.
+ */
+export const BUILDINGS = [
+  {
+    id: 'angeles-hall',
+    name: 'Angeles Hall',
+    aka: 'Administration Building',
+    mapQuery: 'Angeles Hall, Angeles University Foundation, Angeles City, Pampanga',
+    rooms: [
+      'Office of the University Registrar and Admissions — Room A-203, 2nd Floor',
+      'AUF Cashier Accounting Office — Ground Floor, beside the Chapel',
+    ],
+    x: null,
+    y: null,
+  },
+  {
+    id: 'library-commons',
+    name: 'University Library Building',
+    aka: 'Learning Commons, 2nd Floor',
+    mapQuery: 'University Library, Angeles University Foundation, Angeles City, Pampanga',
+    rooms: ['Learning Commons — 2nd Floor'],
+    x: null,
+    y: null,
+  },
+  {
+    id: 'college-office',
+    name: 'Your college office',
+    aka: 'for example, the College of Computer Studies',
+    mapQuery: 'Angeles University Foundation, Angeles City, Pampanga',
+    rooms: ['Ask at your own college — each one issues its own registration form'],
+    x: null,
+    y: null,
+  },
+];
+
+/** Step 1 happens before the student travels, so it has no building. */
+export const ONLINE = {
+  id: 'online',
+  name: 'myAU portal',
+  href: 'https://www.auf.edu.ph/',
+};
 
 export const STEPS = [
   {
@@ -13,6 +66,7 @@ export const STEPS = [
     detail:
       'Enlist in your subjects through the online myAU portal before going to campus.',
     location: 'myAU portal — auf.edu.ph',
+    buildingId: 'online',
   },
   {
     number: '2',
@@ -21,6 +75,13 @@ export const STEPS = [
       'Submit your PSA Birth Certificate, printed GSPIS, and Form 138 / SF10 inside a long brown envelope.',
     location:
       'Office of the University Registrar and Admissions, Room A-203, 2nd Floor, Angeles Hall',
+    buildingId: 'angeles-hall',
+    bring: [
+      'PSA Birth Certificate',
+      'Printed GSPIS',
+      'Form 138 / SF10',
+      'Long brown envelope',
+    ],
   },
   {
     number: '3',
@@ -28,18 +89,21 @@ export const STEPS = [
     detail: 'Settle your enrollment fees and keep the official receipt.',
     location:
       'AUF Cashier Accounting Office, Ground Floor, Angeles Hall, beside the Chapel',
+    buildingId: 'angeles-hall',
   },
   {
     number: '4',
     title: 'Student ID Processing',
     detail: 'Have your photo taken and your student ID processed.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
+    buildingId: 'library-commons',
   },
   {
     number: '5',
     title: 'AUF Email Account',
     detail: 'Claim your official AUF student email account.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
+    buildingId: 'library-commons',
   },
   {
     number: '6',
@@ -47,12 +111,28 @@ export const STEPS = [
     detail:
       'Claim your registration form at your respective college office, for example the College of Computer Studies.',
     location: 'Your respective college office',
+    buildingId: 'college-office',
   },
   {
     number: '7',
     title: 'Medical Exam & Uniforms',
     detail: 'Complete your medical examination and order your school uniforms.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
+    buildingId: 'library-commons',
+  },
+];
+
+/**
+ * Steps 4, 5 and 7 are handled together at one counter. The official numbering
+ * stays intact — students quote those numbers at the office — but the page
+ * surfaces the grouping so nobody queues at the Learning Commons three times.
+ */
+export const TRIPS = [
+  {
+    buildingId: 'library-commons',
+    steps: ['4', '5', '7'],
+    label: 'One trip to the Learning Commons',
+    note: 'Steps 4, 5 and 7 are handled together — do all three while you are there.',
   },
 ];
 

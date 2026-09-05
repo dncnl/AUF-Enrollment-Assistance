@@ -12,12 +12,30 @@
  * To swap in the real model:
  *   1. Add the tfjs + qna script tags to index.html.
  *   2. warmup()  ->  model = await qna.load();
+ *                    forward tf's loading progress to onProgress.
  *   3. answer()  ->  const [best] = await model.findAnswers(question, passage);
  *                    return best ?? null;
  */
 
+/**
+ * What the UI tells the student before it spends their mobile data. Kept here
+ * beside the seam so the figure changes in the same commit as the model.
+ */
+export const MODEL_INFO = {
+  name: 'MobileBERT QnA',
+  downloadMB: 103,
+  /** The stub downloads nothing, so the UI can skip the data warning today. */
+  needsDownload: false,
+};
+
 /** Below this score we show "no confident match" instead of guessing. */
 const CONFIDENCE_FLOOR = 0.18;
+
+/**
+ * Above the floor but below this, the answer is shown with a caveat rather
+ * than as a flat statement of fact.
+ */
+export const LOW_CONFIDENCE = 0.3;
 
 /** Words too common to carry meaning when matching a question to a sentence. */
 const STOPWORDS = new Set([
@@ -31,10 +49,16 @@ const STOPWORDS = new Set([
 ]);
 
 /**
- * Prepare the answering engine. No-op for the stub; becomes qna.load() later,
- * which is why callers must already treat it as slow and failable.
+ * Prepare the answering engine. Near-instant for the stub; becomes a ~103 MB
+ * qna.load() later, which is why callers must already treat it as slow and
+ * failable.
+ *
+ * @param {(fraction: number) => void} [onProgress] Called with 0..1 as the
+ *   model downloads. The stub reports a single completed beat so the status
+ *   chip is exercised; the real implementation forwards tf's onProgress.
  */
-export async function warmup() {
+export async function warmup(onProgress) {
+  onProgress?.(1);
   return true;
 }
 
