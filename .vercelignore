@@ -1,0 +1,7 @@
+# Everything in the repo root is served as a static file, so anything that is
+# not part of the site is excluded here rather than published by accident.
+
+*.md
+.claude/
+.git/
+.gitignore

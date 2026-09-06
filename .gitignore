@@ -1,0 +1,20 @@
+# Vercel
+.vercel
+
+# Environment — never commit real values
+.env
+.env.*
+!.env.example
+
+# Dependencies (none today; the app is dependency-free)
+node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+
+# Logs
+*.log
+npm-debug.log*

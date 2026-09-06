@@ -113,10 +113,15 @@ function renderProgress() {
     <div class="progress__bar" role="progressbar"
          aria-valuenow="${count}" aria-valuemin="0" aria-valuemax="${total}"
          aria-label="Enrollment steps completed">
-      <div class="progress__fill" style="width:${pct}%"></div>
+      <div class="progress__fill"></div>
     </div>
     ${count > 0 ? '<button class="progress__reset" type="button" id="progress-reset">Reset</button>' : ''}
   `;
+
+  // Set from script rather than a style attribute: CSP blocks inline styles,
+  // and going through the CSSOM keeps style-src free of 'unsafe-inline'.
+  const fill = progressEl.querySelector('.progress__fill');
+  if (fill) fill.style.width = `${pct}%`;
 }
 
 /**

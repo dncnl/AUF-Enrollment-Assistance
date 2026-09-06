@@ -78,6 +78,31 @@ instead of spending a student's data on page load.
 - [TensorFlow.js](https://www.tensorflow.org/js) + [`@tensorflow-models/qna`](https://github.com/tensorflow/tfjs-models/tree/master/qna) (MobileBERT QnA, ~103 MB model download)
 - Static HTML/CSS/JS, served locally via VS Code Live Server (camera/mic not required here, but QnA still needs `localhost`/HTTPS-safe serving for asset loading)
 
+## Deploying to Vercel
+
+No build step and no `package.json` — import the repo and keep the framework
+preset as **Other**, with the root directory as the output. `vercel.json`
+supplies the security headers and caching.
+
+The Content-Security-Policy is deliberately strict: `script-src 'self'` with no
+nonce (there are no inline `<script>` blocks) and `style-src` without
+`'unsafe-inline'` (the progress bar and map pins are positioned through the
+CSSOM, not `style` attributes). Keep it that way — reintroducing a `style="…"`
+attribute silently breaks under this policy.
+
+`js/` and `css/` are served `must-revalidate` because nothing is
+content-hashed; long-lived caching there strands users on stale modules.
+
+**When MobileBERT QnA lands, the CSP must be widened** or the model will fail
+to load with only a console error:
+
+- `script-src` — add the CDN serving `tfjs` and `@tensorflow-models/qna`
+- `connect-src` — add the origin the model weights are fetched from
+
+Platform-level options worth enabling in project settings: Deployment
+Protection, so preview URLs are not publicly readable, and Vercel WAF rate
+limiting if the page is ever put behind a form that costs anything to run.
+
 ## Design reference
 
 - **Palette:** Primary Base `#0C2340`, Primary Accent `#C5A059`.

@@ -79,7 +79,7 @@ function schematic() {
   const pins = BUILDINGS.map(
     (b) => `
       <a class="campusmap__pin" href="#place-${escapeHtml(b.id)}"
-         style="left:${b.x}%;top:${b.y}%">
+         data-x="${b.x}" data-y="${b.y}">
         <span class="campusmap__dot" aria-hidden="true"></span>
         <span class="campusmap__label">${escapeHtml(b.name)}</span>
       </a>`,
@@ -102,4 +102,11 @@ export function renderCampus(el) {
     ${hasLayout() ? schematic() : ''}
     <ul class="places">${BUILDINGS.map(placeCard).join('')}</ul>
   `;
+
+  // Positioned from script rather than a style attribute: CSP blocks inline
+  // styles, and the CSSOM route keeps style-src free of 'unsafe-inline'.
+  el.querySelectorAll('.campusmap__pin').forEach((pin) => {
+    pin.style.left = `${pin.dataset.x}%`;
+    pin.style.top = `${pin.dataset.y}%`;
+  });
 }
