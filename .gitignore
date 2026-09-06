@@ -9,6 +9,18 @@
 # Dependencies (none today; the app is dependency-free)
 node_modules/
 
+# MobileBERT QnA weights — ~101 MB across 26 files, fetched by
+# scripts/fetch-model.sh. Never committed: git would keep every byte in
+# history forever, and they are reproducible from Kaggle at any time.
+# See docs/mobilebert-setup.md §7 for how they reach production.
+models/
+*.tar.gz
+*.tgz
+
+# Vendored tfjs / qna UMD bundles are the opposite case — small, pinned, and
+# the reason script-src can stay 'self'. They belong in git, so nothing here
+# excludes vendor/.
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

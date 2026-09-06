@@ -273,6 +273,7 @@ async function onAsk(event) {
   event.preventDefault();
   const question = input.value.trim();
   if (!question) {
+    nudgeSearch();
     input.focus();
     return;
   }
@@ -282,6 +283,13 @@ async function onAsk(event) {
     '<span class="spinner" aria-hidden="true"></span>' +
       '<span><strong>Searching the enrollment guidelines…</strong>' +
       'Reading the official AUF passage for your answer.</span>',
+    // Bars in the shape of the answer that is coming. A blank pause reads as
+    // a page that has stalled; this reads as a page that is working.
+    '<div class="answer__loading" aria-hidden="true">' +
+      '<span class="answer__skeleton"></span>' +
+      '<span class="answer__skeleton"></span>' +
+      '<span class="answer__skeleton"></span>' +
+      '</div>',
   );
 
   try {
@@ -304,6 +312,21 @@ async function onAsk(event) {
 function setBusy(busy) {
   button.disabled = busy;
   button.textContent = busy ? 'Asking…' : 'Ask Assist';
+}
+
+/**
+ * Submitted with nothing typed. A shake says "this field, now" without
+ * printing an error the student then has to dismiss. Focus moves there
+ * regardless, so the animation is never the only thing carrying it.
+ */
+function nudgeSearch() {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+  form.classList.remove('is-empty');
+  void form.offsetWidth; // reflow, so a second empty submit replays the shake
+  form.classList.add('is-empty');
+  form.addEventListener('animationend', () => form.classList.remove('is-empty'), {
+    once: true,
+  });
 }
 
 function escalationActions() {

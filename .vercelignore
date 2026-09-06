@@ -2,6 +2,11 @@
 # not part of the site is excluded here rather than published by accident.
 
 *.md
+docs/
 .claude/
 .git/
 .gitignore
+
+# scripts/ is NOT excluded: if you use the build-time model fetch
+# (docs/mobilebert-setup.md §7 option A), Vercel needs fetch-model.sh present
+# at build time. It costs a few hundred bytes of static hosting.

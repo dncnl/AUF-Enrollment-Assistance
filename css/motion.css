@@ -1,0 +1,196 @@
+/* ==========================================================================
+   AUF EnrollFlow Assist — motion layer
+
+   Loaded after styles.css. Presentation only: delete this file and the page
+   still reads and works, it just stops moving. Nothing here changes a colour,
+   a surface or a layout — styles.css stays the single source for all three,
+   including its flat, hairline-separated surfaces.
+
+   The curves and durations are published values, not invented ones:
+
+     --ease-emphasized / --ease-decel
+       Material Design 3 easing set (m3.material.io/styles/motion). Emphasized
+       is the M3 default for anything entering or leaving the screen.
+
+     --ease-out-expo / --ease-out-quint
+       Robert Penner's equations as published on easings.net — the curves GSAP
+       ships as expo.out and quint.out.
+
+     --dur-*  IBM Carbon motion duration scale (carbondesignsystem.com):
+       small elements move fast, large surfaces move slow, nothing over 700ms.
+
+   The head-shake keyframe follows Animate.css (animate.style, MIT), retimed
+   for a form field rather than a landing page. It is written out here rather
+   than pulled from a CDN because the site ships script-src 'self' and
+   img-src 'self', and no third-party origin is worth loosening that for.
+
+   One standing rule, learned the hard way: never put a transform animation or
+   will-change on .step.is-next or on .steps > li's descendants. The numbered
+   tick is absolutely positioned out in the timeline gutter, anchored to the
+   row. An element carrying a transform animation becomes the containing block
+   for its absolutely positioned descendants, so the tick re-anchors to the
+   card and lands on top of its own "Step N" label.
+   ========================================================================== */
+
+:root {
+  --ease-emphasized: cubic-bezier(.2, 0, 0, 1);
+  --ease-decel:      cubic-bezier(0, 0, 0, 1);
+  --ease-out-expo:   cubic-bezier(.16, 1, .3, 1);
+  --ease-out-quint:  cubic-bezier(.22, 1, .36, 1);
+
+  --dur-fast: 110ms;   /* colour on a small control        */
+  --dur-base: 240ms;   /* a control changing state         */
+  --dur-slow: 400ms;   /* a panel opening                  */
+  --dur-slower: 640ms; /* a section arriving               */
+}
+
+/* Animate.css headShake, horizontal only, so an empty search field reads as
+   "this one, now" rather than as an error the student has to dismiss. */
+@keyframes head-shake {
+  0%    { transform: translateX(0); }
+  12.5% { transform: translateX(-5px); }
+  37.5% { transform: translateX(4px); }
+  62.5% { transform: translateX(-2.5px); }
+  87.5% { transform: translateX(1.5px); }
+  100%  { transform: translateX(0); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Loading sweep. Travels 200% so the highlight fully clears the element. */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ---------- Scroll reveal ------------------------------------------------
+
+   Already in styles.css and already wired in app.js. All this does is give it
+   a better curve and a little more room to decelerate into.
+   ------------------------------------------------------------------------ */
+
+.reveal {
+  transform: translate3d(0, 14px, 0);
+  transition:
+    opacity var(--dur-slower) var(--ease-out-expo),
+    transform var(--dur-slower) var(--ease-out-expo);
+}
+
+/* ---------- Controls -----------------------------------------------------
+
+   The feedback a finger expects: a press that acknowledges itself. Kept to
+   one pixel of travel — enough to feel, not enough to notice.
+   ------------------------------------------------------------------------ */
+
+.btn,
+.chip,
+.dirlink,
+.step__done,
+.progress__reset {
+  transition:
+    background-color var(--dur-base) var(--ease-emphasized),
+    border-color var(--dur-base) var(--ease-emphasized),
+    color var(--dur-base) var(--ease-emphasized),
+    transform var(--dur-fast) var(--ease-out-quint);
+}
+.btn:hover,
+.chip:hover,
+.dirlink:hover,
+.step__done:hover { transform: translateY(-1px); }
+
+.btn:active,
+.chip:active,
+.dirlink:active,
+.step__done:active { transform: scale(.985); transition-duration: 60ms; }
+
+.btn[disabled]:hover { transform: none; }
+
+/* Submitted with nothing typed. app.js adds the class and removes it when the
+   animation ends; focus moves to the field regardless, so the shake is never
+   the only thing carrying the message. */
+.search.is-empty { animation: head-shake 620ms var(--ease-emphasized); }
+
+/* ---------- Disclosure ---------------------------------------------------
+
+   The seven steps and the FAQs both open as <details>. Modern engines can
+   transition the content box itself; everywhere else the panel fades in on
+   open. Neither can animate a close, so the caret carries that gesture.
+   ------------------------------------------------------------------------ */
+
+.step__caret,
+.faq__caret { transition: transform var(--dur-base) var(--ease-emphasized); }
+
+.step[open] > .step__body,
+.faq[open] > .faq__a { animation: fade-up var(--dur-slow) var(--ease-emphasized) both; }
+
+@supports (interpolate-size: allow-keywords) {
+  /* Scoped to the two disclosure widgets rather than :root — this only needs
+     to reach ::details-content, and it inherits. */
+  .step, .faq { interpolate-size: allow-keywords; }
+
+  .step::details-content,
+  .faq::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height var(--dur-slow) var(--ease-emphasized),
+      content-visibility var(--dur-slow) allow-discrete;
+  }
+  .step[open]::details-content,
+  .faq[open]::details-content { height: auto; }
+
+  /* The keyframe would fight the height transition. */
+  .step[open] > .step__body,
+  .faq[open] > .faq__a { animation: none; }
+}
+
+/* ---------- Answer surface ----------------------------------------------- */
+
+.answer { animation: fade-up var(--dur-slow) var(--ease-out-expo) both; }
+
+/* Waiting on the model: bars in the shape of the answer that is coming. A
+   blank pause reads as a page that has stalled. */
+.answer__skeleton {
+  display: block;
+  height: 10px;
+  border-radius: var(--pill);
+  background: linear-gradient(
+    90deg,
+    var(--sunken) 25%,
+    rgba(255,255,255,.95) 50%,
+    var(--sunken) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.progress__fill { transition: width var(--dur-slower) var(--ease-out-expo); }
+
+/* ---------- Navigation ---------------------------------------------------- */
+
+.rail__link {
+  transition:
+    color var(--dur-base) var(--ease-emphasized),
+    border-color var(--dur-base) var(--ease-emphasized);
+}
+
+/* ==========================================================================
+   Reduced motion
+
+   styles.css collapses every duration to 0.01ms, which lands each animation
+   on its final keyframe. What that cannot fix is a rule whose resting state
+   is displaced — .reveal starts translated, and this file loads afterwards,
+   so that state has to be undone here too.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .btn:hover, .chip:hover, .dirlink:hover, .step__done:hover { transform: none; }
+}

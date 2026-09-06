@@ -9,12 +9,15 @@
  * The return shape matches @tensorflow-models/qna's findAnswers() entries:
  *   { text, score, startIndex, endIndex }
  *
- * To swap in the real model:
- *   1. Add the tfjs + qna script tags to index.html.
- *   2. warmup()  ->  model = await qna.load();
- *                    forward tf's loading progress to onProgress.
- *   3. answer()  ->  const [best] = await model.findAnswers(question, passage);
- *                    return best ?? null;
+ * To swap in the real model: docs/mobilebert-setup.md has the whole procedure,
+ * with the finished replacements for warmup() and answer(). Two corrections to
+ * what this comment used to say, both verified against the published bundle:
+ *
+ *   - qna.load() takes no onProgress. It does not forward LoadOptions to
+ *     loadGraphModel, so progress has to come from prefetching the shards.
+ *   - findAnswers() returns score as startLogit + endLogit — unbounded, with a
+ *     no-answer threshold of 4.398. Returning it unmapped would make app.js
+ *     print "Confidence 1650%" and silently stop showing the caveat.
  */
 
 /**
@@ -23,7 +26,9 @@
  */
 export const MODEL_INFO = {
   name: 'MobileBERT QnA',
-  downloadMB: 103,
+  /** Measured: 101.5 MB across 26 files. Rounded up so the figure on screen
+      is never smaller than what the student actually spends. */
+  downloadMB: 102,
   /** The stub downloads nothing, so the UI can skip the data warning today. */
   needsDownload: false,
 };
@@ -49,9 +54,9 @@ const STOPWORDS = new Set([
 ]);
 
 /**
- * Prepare the answering engine. Near-instant for the stub; becomes a ~103 MB
+ * Prepare the answering engine. Near-instant for the stub; becomes a ~102 MB
  * qna.load() later, which is why callers must already treat it as slow and
- * failable.
+ * failable. See docs/mobilebert-setup.md for the swap.
  *
  * @param {(fraction: number) => void} [onProgress] Called with 0..1 as the
  *   model downloads. The stub reports a single completed beat so the status

@@ -47,6 +47,11 @@ js/progress.js      per-browser step completion (localStorage, guarded)
 js/dom.js           escapeHtml + the outline icon set
 js/app.js           rendering + event wiring
 assets/             AUF seal, Angeles Hall photo
+css/motion.css      easing tokens + the moving parts (delete it and the page
+                    still works, it just stops moving)
+docs/               setup guides; excluded from the deployment
+scripts/            fetch-model.sh — pulls the MobileBERT weights
+models/             the weights themselves; gitignored, ~101 MB
 ```
 
 Navigation is a bottom tab bar on mobile and a sticky section rail on desktop;
@@ -57,25 +62,34 @@ Run it with VS Code Live Server, or `python -m http.server 5500` and open
 
 ## Wiring in MobileBERT QnA
 
+**Full setup guide: [`docs/mobilebert-setup.md`](docs/mobilebert-setup.md).**
+
 `js/qna.js` is the only file that changes. It currently answers with a
 keyword-overlap stub so the full UI — loading, answer, no-match, and error
 states — is already built and exercised. It exports the same shape the real
-model returns (`{ text, score, startIndex, endIndex }`), so integration is:
+model returns (`{ text, score, startIndex, endIndex }`), so `js/app.js` never
+learns which one produced the result.
 
-1. Add the `tfjs` and `@tensorflow-models/qna` script tags to `index.html`.
-2. `warmup(onProgress)` → `model = await qna.load();`, forwarding tf's loading
-   progress to `onProgress`, and set `MODEL_INFO.needsDownload = true`.
-3. `answer()` → `const [best] = await model.findAnswers(question, passage); return best ?? null;`
+The outline is: vendor `tfjs@4.22.0` and `@tensorflow-models/qna@1.0.2`,
+self-host the ~101 MB of weights under `models/`, rewrite `warmup()` and
+`answer()`, and set `MODEL_INFO.needsDownload = true` — which flips the UI to
+its metered-connection behaviour, stating the cost up front and deferring the
+load to the first question rather than spending a student's data on page load.
 
-Setting `needsDownload` flips the UI to its metered-connection behaviour: it
-states the ~103 MB cost up front and defers the load to the first question
-instead of spending a student's data on page load.
+Four things in that guide are not obvious and are each worth reading before you
+start:
 
-`js/app.js` never learns which one produced the result.
+- `tfhub.dev` was retired in Nov 2023; the package still hardcodes it, and the
+  redirect chain now issues signed URLs that expire in three hours.
+- The tokenizer's vocabulary URL is a hardcoded constant, *not* derived from
+  the `modelUrl` you pass — self-hosting the model alone is not enough.
+- `score` is a raw logit sum, not 0–1. Rendered as-is, the UI would print
+  “Confidence 1650%” and the low-confidence caveat would never appear.
+- Questions over 64 word-piece tokens make the tokenizer throw.
 
 ## Tech stack
 
-- [TensorFlow.js](https://www.tensorflow.org/js) + [`@tensorflow-models/qna`](https://github.com/tensorflow/tfjs-models/tree/master/qna) (MobileBERT QnA, ~103 MB model download)
+- [TensorFlow.js](https://www.tensorflow.org/js) + [`@tensorflow-models/qna`](https://github.com/tensorflow/tfjs-models/tree/master/qna) (MobileBERT QnA — 26 files, 101.5 MB, pinned at `tfjs@4.22.0` / `qna@1.0.2`)
 - Static HTML/CSS/JS, served locally via VS Code Live Server (camera/mic not required here, but QnA still needs `localhost`/HTTPS-safe serving for asset loading)
 
 ## Deploying to Vercel
@@ -93,11 +107,12 @@ attribute silently breaks under this policy.
 `js/` and `css/` are served `must-revalidate` because nothing is
 content-hashed; long-lived caching there strands users on stale modules.
 
-**When MobileBERT QnA lands, the CSP must be widened** or the model will fail
-to load with only a console error:
-
-- `script-src` — add the CDN serving `tfjs` and `@tensorflow-models/qna`
-- `connect-src` — add the origin the model weights are fetched from
+**When MobileBERT QnA lands, the CSP does not have to change** — provided you
+vendor the two libraries and self-host the weights, which is what
+[`docs/mobilebert-setup.md`](docs/mobilebert-setup.md) walks through. Everything
+stays same-origin. You only widen the policy if you deviate: a CDN needs
+`script-src`, and remote weights (or skipping the vocabulary shim) need
+`connect-src`. §8 of the guide has the exact table.
 
 Platform-level options worth enabling in project settings: Deployment
 Protection, so preview URLs are not publicly readable, and Vercel WAF rate

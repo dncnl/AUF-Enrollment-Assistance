@@ -275,6 +275,8 @@ img { max-width: 100%; }
   letter-spacing: var(--track-ui);
   color: rgba(255,255,255,.82);
 }
+/* display:flex above would otherwise beat the UA rule for [hidden]. */
+.modelstate[hidden] { display: none; }
 .modelstate__dot { width: 8px; height: 8px; flex: none; border-radius: 50%; background: var(--gold); }
 .modelstate.is-ready .modelstate__dot { background: #6ee7a8; }
 .modelstate.is-failed .modelstate__dot { background: #f2a08a; }
@@ -408,6 +410,11 @@ main {
   font-size: 18px;
   letter-spacing: var(--track-ui);
 }
+/* The shape of the answer that is coming, while the model is still reading. */
+.answer__loading { display: grid; gap: var(--space-3); margin-top: var(--space-5); }
+.answer__loading span:nth-child(2) { width: 92%; }
+.answer__loading span:nth-child(3) { width: 58%; }
+
 .answer__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
 .answer__actions .btn { min-height: 44px; font-size: 15px; padding: 0 var(--space-4); }
 .answer__actions .btn--ghost { color: var(--navy); border-color: var(--hairline); }
@@ -670,11 +677,18 @@ main {
 
 .places { display: grid; gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
 
+/* Flat as before — the navy rule on top is the whole treatment. The column
+   layout is the only thing that changes with width. */
 .place {
+  display: flex;
+  flex-direction: column;
   padding-top: var(--space-5);
   border-top: 2px solid var(--navy);
   scroll-margin-top: var(--space-6);
 }
+/* Pins the directions link to the bottom, so uneven room lists still leave
+   the three links on one line instead of stepping down the page. */
+.place .dirlink { align-self: flex-start; margin-top: auto; }
 .place__name { font-size: clamp(20px, 5vw, 25px); color: var(--navy); }
 .place__aka {
   margin-top: var(--space-1);
@@ -749,9 +763,16 @@ main {
 
 /* ---------- FAQs ---------------------------------------------------------- */
 
-.faqs { max-width: var(--measure); border-top: 1px solid var(--hairline); }
+/* Grid rather than a plain stack purely so it can go two columns on a wide
+   screen. At one column it renders exactly as it always did. */
+.faqs {
+  display: grid;
+  align-content: start;
+  max-width: var(--measure);
+  border-top: 1px solid var(--hairline);
+}
 
-.faq { border-bottom: 1px solid var(--hairline); }
+.faq { border-bottom: 1px solid var(--hairline); height: fit-content; }
 .faq__q {
   display: flex;
   align-items: center;
@@ -793,10 +814,38 @@ main {
   color: #fff;
 }
 .footer__inner {
+  display: grid;
+  gap: var(--space-6);
   max-width: var(--shell);
   margin: 0 auto;
   padding: var(--space-7) var(--gutter);
 }
+
+/* A second column of section links, so the footer is not one short paragraph
+   in a very wide band. Plain links, no boxes. */
+.footer__navlabel {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+}
+.footer__links { list-style: none; margin: 0; padding: 0; }
+.footer__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: var(--track-ui);
+  transition: color 200ms ease;
+}
+.footer__links a:hover { color: var(--gold); }
 .footer__title {
   margin-bottom: var(--space-3);
   font-family: var(--font-display);
@@ -870,6 +919,7 @@ main {
 
   .answer { padding: var(--space-6); }
   .escalate { padding: var(--space-7) var(--space-6); }
+  .footer__inner { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: var(--space-7); }
 }
 
 @media (min-width: 1000px) {
@@ -913,8 +963,22 @@ main {
   .rail__link.is-active { color: var(--navy); font-weight: 600; border-left-color: var(--gold-line); }
 
   .hero__inner { padding-block: var(--space-6) var(--space-8); }
-  .places { grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+
+  /* Three buildings, three columns — the campus list now spans the width it
+     was already being given instead of stopping at the text measure. */
+  .places {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-6);
+  }
   .campusmap, .places { max-width: none; }
+
+  /* Two columns of FAQs. Each column opens independently, so answering one
+     question never shoves the other column down the page. */
+  .faqs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-7);
+    max-width: none;
+  }
 }
 
 @media (min-width: 1240px) {
