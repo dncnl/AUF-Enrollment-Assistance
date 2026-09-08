@@ -245,6 +245,13 @@ img { max-width: 100%; }
   max-width: 15ch;
   text-wrap: balance;
 }
+/* The one accent word in the headline — Fraunces's true italic (loaded via
+   the ital axis), not a browser-synthesized slant, in the dark-surface gold. */
+.hero__title em {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--gold);
+}
 .hero__sub {
   font-size: clamp(16px, 4vw, 19px);
   color: rgba(255,255,255,.84);
