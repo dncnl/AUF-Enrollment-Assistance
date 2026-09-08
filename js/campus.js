@@ -41,27 +41,48 @@ function tripFor(buildingId) {
  */
 export function directionsLink(building, { compact = false } = {}) {
   if (!building) return '';
-  const label = compact ? 'Directions' : `Directions to ${building.name}`;
+  // `shortName` keeps the pill button on one line for a building whose full,
+  // correct name is too long to sit inside "Directions to …" — the card's
+  // own heading nearby still carries the full name.
+  const displayName = building.shortName || building.name;
+  const label = compact ? 'Directions' : `Directions to ${displayName}`;
+  // Compact mode always sits right under the building's own name, but three
+  // of these can end up on one screen at once (place cards) or announced out
+  // of that context (a screen reader's links list) — spell it out for
+  // assistive tech even when the visible label stays short.
+  const ariaLabel = compact ? ` aria-label="${escapeHtml(`Directions to ${building.name}`)}"` : '';
   return (
     `<a class="dirlink${compact ? ' dirlink--compact' : ''}" ` +
-    `href="${escapeHtml(mapsHref(building.mapQuery))}" ` +
+    `href="${escapeHtml(mapsHref(building.mapQuery))}"${ariaLabel} ` +
     `target="_blank" rel="noopener">` +
     `${icon('pin')}<span>${escapeHtml(label)}</span>${icon('external', 'icon icon--sm')}` +
     `</a>`
   );
 }
 
+/**
+ * WebP with the JPEG as the fallback source. Every photo ships as both, so the
+ * .webp path is derived rather than carried in data.js. The wrapper's
+ * aspect-ratio already reserves the space; width/height carry the file's real
+ * intrinsic size so nothing depends on the CSS having loaded first.
+ */
+function photoMarkup({ photo, photoWidth, photoHeight }) {
+  const webp = photo.replace(/\.jpe?g$/i, '.webp');
+  return `
+    <div class="place__photo">
+      <picture>
+        <source srcset="${escapeHtml(webp)}" type="image/webp">
+        <img src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async"
+             width="${escapeHtml(photoWidth)}" height="${escapeHtml(photoHeight)}">
+      </picture>
+    </div>`;
+}
+
 function placeCard(building) {
   const trip = tripFor(building.id);
   return `
     <li class="place" id="place-${escapeHtml(building.id)}">
-      ${
-        building.photo
-          ? `<div class="place__photo">
-               <img src="${escapeHtml(building.photo)}" alt="" loading="lazy">
-             </div>`
-          : ''
-      }
+      ${building.photo ? photoMarkup(building) : ''}
       <div class="place__head">
         <h3 class="place__name">${escapeHtml(building.name)}</h3>
         <p class="place__aka">${escapeHtml(building.aka)}</p>
@@ -71,9 +92,13 @@ function placeCard(building) {
           ? `<p class="place__trip">${icon('check', 'icon icon--sm')}<span>${escapeHtml(trip.note)}</span></p>`
           : ''
       }
-      <ul class="place__rooms">
-        ${building.rooms.map((room) => `<li>${escapeHtml(room)}</li>`).join('')}
-      </ul>
+      ${
+        building.rooms.length
+          ? `<ul class="place__rooms">
+               ${building.rooms.map((room) => `<li>${escapeHtml(room)}</li>`).join('')}
+             </ul>`
+          : ''
+      }
       ${directionsLink(building)}
     </li>`;
 }

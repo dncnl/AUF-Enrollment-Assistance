@@ -12,6 +12,10 @@ const modelStateEl = document.getElementById('model-state');
 const stepsEl = document.getElementById('steps');
 const progressEl = document.getElementById('progress');
 
+/** True while a question is in flight — see setBusy for why this is not the
+    button's own disabled state. */
+let busy = false;
+
 /** One definition drives both the desktop nav and the mobile tab bar. */
 const NAV = [
   { href: '#home', label: 'Home', icon: 'house' },
@@ -103,25 +107,43 @@ function renderSteps() {
   renderProgress();
 }
 
-function renderProgress() {
-  const total = STEPS.length;
-  const count = progress.doneCount();
-  const pct = Math.round((count / total) * 100);
-
+/**
+ * Built once, then mutated. Re-rendering the markup on every tick cost three
+ * things at once: the fill had no previous width to animate from, so its
+ * transition never ran; the progressbar node was replaced, so assistive tech
+ * saw a new element instead of a changed value; and whoever was focused on
+ * Reset lost their place.
+ */
+function mountProgress() {
   progressEl.innerHTML = `
-    <p class="progress__text">${count === total ? 'All steps done' : `${count} of ${total} done`}</p>
+    <p class="progress__text"></p>
     <div class="progress__bar" role="progressbar"
-         aria-valuenow="${count}" aria-valuemin="0" aria-valuemax="${total}"
+         aria-valuenow="0" aria-valuemin="0" aria-valuemax="${STEPS.length}"
          aria-label="Enrollment steps completed">
       <div class="progress__fill"></div>
     </div>
-    ${count > 0 ? '<button class="progress__reset" type="button" id="progress-reset">Reset</button>' : ''}
+    <button class="progress__reset" type="button" id="progress-reset" hidden>Reset</button>
   `;
+  renderProgress();
+}
+
+function renderProgress() {
+  const total = STEPS.length;
+  const count = progress.doneCount();
+
+  progressEl.querySelector('.progress__text').textContent =
+    count === total ? 'All steps done' : `${count} of ${total} done`;
+
+  progressEl.querySelector('.progress__bar').setAttribute('aria-valuenow', String(count));
 
   // Set from script rather than a style attribute: CSP blocks inline styles,
   // and going through the CSSOM keeps style-src free of 'unsafe-inline'.
-  const fill = progressEl.querySelector('.progress__fill');
-  if (fill) fill.style.width = `${pct}%`;
+  progressEl.querySelector('.progress__fill').style.width =
+    `${Math.round((count / total) * 100)}%`;
+
+  // Nothing to reset at zero, but the button keeps its place in the DOM so
+  // hiding it never yanks focus out of the page.
+  progressEl.querySelector('.progress__reset').hidden = count === 0;
 }
 
 /**
@@ -173,6 +195,9 @@ function wireSteps() {
     if (!event.target.closest('#progress-reset')) return;
     progress.reset();
     renderSteps();
+    // Reset hides itself once there is nothing left to clear, so focus has to
+    // go somewhere deliberate rather than falling back to the document.
+    stepsEl.querySelector('.step__head')?.focus();
   });
 }
 
@@ -224,7 +249,8 @@ function renderNav() {
   ).join('');
 
   document.getElementById('rail').innerHTML = NAV.map(
-    (item) => `<li><a class="rail__link" href="${item.href}">${escapeHtml(item.label)}</a></li>`,
+    (item) =>
+      `<li><a class="rail__link" href="${item.href}">${icon(item.icon)}<span>${escapeHtml(item.label)}</span></a></li>`,
   ).join('');
 }
 
@@ -271,6 +297,10 @@ function ensureModel() {
 
 async function onAsk(event) {
   event.preventDefault();
+  // The button reports itself busy through aria-disabled, which still accepts
+  // clicks — so the guard lives here rather than in the DOM.
+  if (busy) return;
+
   const question = input.value.trim();
   if (!question) {
     nudgeSearch();
@@ -290,6 +320,9 @@ async function onAsk(event) {
       '<span class="answer__skeleton"></span>' +
       '<span class="answer__skeleton"></span>' +
       '</div>',
+    // Move here and only here: the student watches the skeleton arrive, and
+    // the real answer then replaces it without a second jump.
+    { move: true },
   );
 
   try {
@@ -309,9 +342,15 @@ async function onAsk(event) {
   }
 }
 
-function setBusy(busy) {
-  button.disabled = busy;
-  button.textContent = busy ? 'Asking…' : 'Ask Assist';
+/**
+ * aria-disabled rather than the disabled attribute. A disabled button is pulled
+ * out of the tab order, and disabling the one the student just pressed drops
+ * focus onto <body> — so the next Tab restarts from the top of the page.
+ */
+function setBusy(isBusy) {
+  busy = isBusy;
+  button.setAttribute('aria-disabled', String(isBusy));
+  button.textContent = isBusy ? 'Asking…' : 'Ask Assist';
 }
 
 /**
@@ -350,7 +389,7 @@ function showAnswer(question, result) {
     }
     <p class="answer__source">${highlightSpan(PASSAGE, result)}</p>
     <p class="answer__meta">
-      Confidence ${(result.score * 100).toFixed(0)}% · extracted by ${escapeHtml(MODEL_INFO.name)}
+      Confidence ${(result.score * 100).toFixed(0)}% · extracted by ${escapeHtml(MODEL_INFO.engine)}
       from the AUF New Student Enrollment Guidelines
     </p>
     ${low ? escalationActions() : ''}
@@ -366,16 +405,37 @@ function showNoMatch() {
   );
 }
 
-function showState(html, extra = '') {
-  reveal(`<p class="answer__state">${html}</p>${extra}`);
+function showState(html, extra = '', options) {
+  reveal(`<p class="answer__state">${html}</p>${extra}`, options);
 }
 
-function reveal(html) {
+function reveal(html, { move = false } = {}) {
   answerEl.innerHTML = html;
   answerEl.hidden = false;
   // #assist only becomes a real destination once it holds something; start
   // tracking it now so the nav can highlight it. Re-observing is a no-op.
   sectionObserver?.observe(document.getElementById('assist'));
+  if (move) bringAnswerIntoView();
+}
+
+/**
+ * The hero fills a phone screen on its own, so the answer lands entirely below
+ * the fold and pressing Ask looks like it did nothing at all.
+ *
+ * Focus deliberately stays where it is: #answer-live announces the result for
+ * screen reader users, and pulling the caret away would interrupt anyone still
+ * editing their question.
+ */
+function bringAnswerIntoView() {
+  const box = answerEl.getBoundingClientRect();
+  // Already on screen and near the top? Leave the page alone.
+  if (box.top >= 0 && box.top < window.innerHeight * 0.6) return;
+
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  document.getElementById('assist').scrollIntoView({
+    block: 'start',
+    behavior: reduce ? 'auto' : 'smooth',
+  });
 }
 
 /**
@@ -485,6 +545,7 @@ function wireReveal() {
 // Runs last so every module-level binding above is already initialised.
 
 renderChips();
+mountProgress();
 renderSteps();
 wireSteps();
 renderCampus(document.getElementById('campus-body'));

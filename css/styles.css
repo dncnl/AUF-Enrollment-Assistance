@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AUF EnrollFlow Assist
+   AUF Enrollment Assistance
    Mobile-first. Written for a freshman standing on campus holding a phone.
 
    Layout:  full-bleed navy opening, then a Swiss two-column body — sticky
@@ -22,6 +22,7 @@
      they land on (--sunken), so they hold on white and --surface too.     */
   --gold-ink: #87692f;    /* gold-family TEXT on light    — 4.53:1 worst   */
   --gold-line: #ab853c;   /* gold-family BORDERS on light — 3.01:1 worst   */
+  --gold-wash: rgba(197, 160, 89, .08); /* tint only, never carries text   */
   --sky: #38bdf8;         /* answer highlight fill only, never a ring      */
 
   /* Surfaces ------------------------------------------------------------ */
@@ -61,6 +62,7 @@
 
   --pill: 999px;
   --shell: 1240px;
+  --shell-wide: 1440px;
   --measure: 68ch;
   --gutter: var(--space-5);
   --tabbar-h: 62px;
@@ -127,7 +129,6 @@ img { max-width: 100%; }
 .icon--sm { width: 15px; height: 15px; }
 
 /* Micro-label used across every section — the League Spartan voice. */
-.section__eyebrow,
 .quick__label,
 .bring__label,
 .dress__label,
@@ -161,7 +162,12 @@ img { max-width: 100%; }
 }
 .btn--gold { background: var(--gold); color: var(--navy); }
 .btn--gold:hover { background: #d3b071; }
-.btn--gold[disabled] { opacity: .65; cursor: progress; }
+/* aria-disabled rather than the disabled attribute while a question is in
+   flight: a disabled button drops out of the tab order, taking the keyboard
+   user's place on the page with it. */
+.btn--gold[disabled],
+.btn--gold[aria-disabled="true"] { opacity: .65; cursor: progress; }
+.btn--gold[aria-disabled="true"]:hover { background: var(--gold); }
 .btn--ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.45); }
 .btn--ghost:hover { background: rgba(255,255,255,.12); }
 
@@ -185,6 +191,16 @@ img { max-width: 100%; }
   content: '';
   position: absolute; inset: 0;
   background: linear-gradient(175deg, rgba(12,35,64,.5) 0%, rgba(12,35,64,.82) 55%, rgba(12,35,64,.97) 100%);
+}
+/* A single gold thread at the seam where the navy hero meets the light body —
+   the one place the brand pairing gets to be a line instead of a fill. */
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+  opacity: .55;
 }
 .hero__inner {
   position: relative;
@@ -222,13 +238,19 @@ img { max-width: 100%; }
   color: rgba(255,255,255,.72);
 }
 
-.hero__eyebrow { color: var(--gold); }
 .hero__title {
-  margin: var(--space-3) 0 var(--space-4);
+  margin: 0 0 var(--space-4);
   font-size: clamp(38px, 10.5vw, 76px);
   line-height: 1.02;
   max-width: 15ch;
   text-wrap: balance;
+}
+/* The one accent word in the headline — Fraunces's true italic (loaded via
+   the ital axis), not a browser-synthesized slant, in the dark-surface gold. */
+.hero__title em {
+  font-style: italic;
+  font-weight: 600;
+  color: var(--gold);
 }
 .hero__sub {
   font-size: clamp(16px, 4vw, 19px);
@@ -325,9 +347,8 @@ main {
   padding-top: var(--space-8);
   scroll-margin-top: var(--space-4);
 }
-.section__eyebrow { color: var(--gold-ink); }
 .section__title {
-  margin: var(--space-2) 0 var(--space-3);
+  margin: 0 0 var(--space-3);
   font-size: clamp(28px, 7.5vw, 44px);
   color: var(--navy);
   max-width: 20ch;
@@ -441,7 +462,9 @@ main {
   gap: var(--space-3);
   padding: var(--space-3) 0;
   margin-bottom: var(--space-5);
-  background: var(--surface);
+  background: rgba(244, 245, 247, .82);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--hairline);
   max-width: var(--measure);
 }
 .progress__text {
@@ -469,8 +492,8 @@ main {
 }
 .progress__reset {
   flex: none;
-  min-height: 36px;
-  padding: 0 var(--space-3);
+  min-height: 44px;
+  padding: 0 var(--space-4);
   background: transparent;
   border: 1px solid var(--hairline);
   border-radius: var(--pill);
@@ -565,11 +588,14 @@ main {
 }
 .step__caret { color: var(--ink-mute); margin-top: 6px; transition: transform 200ms ease; }
 .step[open] .step__caret { transform: rotate(180deg); }
+.step__head:hover .step__caret { color: var(--gold-ink); }
 
-/* The next step is the one thing on the page that should catch the eye. */
+/* The next step is the one thing on the page that should catch the eye — so it
+   stays a white card lifted off the grey page, with the gold only as a wash
+   over it. Tinting the page colour directly flattened it into the background. */
 .step.is-next {
   display: block;
-  background: var(--card);
+  background: linear-gradient(var(--gold-wash), var(--gold-wash)) var(--card);
   border: 1px solid var(--hairline);
   border-left: 3px solid var(--gold-line);
   border-radius: 12px;
@@ -662,6 +688,8 @@ main {
   text-decoration: none;
 }
 .campusmap__dot { width: 16px; height: 16px; border-radius: 50%; background: var(--gold); border: 3px solid var(--navy); }
+.campusmap__pin:hover .campusmap__dot,
+.campusmap__pin:focus-visible .campusmap__dot { transform: scale(1.2); }
 .campusmap__label {
   font-family: var(--font-ui);
   font-weight: 600;
@@ -698,6 +726,13 @@ main {
   overflow: hidden;
   border-radius: 10px;
   margin-bottom: var(--space-4);
+}
+/* <picture> is inline by default, which would leave the img's 100% height with
+   nothing to resolve against and break the cover crop. */
+.place__photo picture {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .place__photo img {
   display: block;
@@ -806,6 +841,7 @@ main {
 .faq__q::-webkit-details-marker { display: none; }
 .faq__caret { flex: none; color: var(--gold-ink); transition: transform 200ms ease; }
 .faq[open] .faq__caret { transform: rotate(180deg); }
+.faq__q:hover .faq__caret { margin-inline-start: 2px; }
 .faq__a { padding: 0 0 var(--space-4); font-size: 15px; color: var(--ink-soft); max-width: 58ch; }
 
 /* ---------- Escalation ---------------------------------------------------- */
@@ -817,8 +853,7 @@ main {
   padding: var(--space-6) var(--space-5);
   max-width: var(--measure);
 }
-.escalate .section__eyebrow { color: var(--gold); }
-.escalate__title { font-size: clamp(26px, 6.5vw, 36px); margin: var(--space-2) 0 var(--space-3); }
+.escalate__title { font-size: clamp(26px, 6.5vw, 36px); margin: 0 0 var(--space-3); }
 .escalate__text { color: rgba(255,255,255,.84); margin-bottom: var(--space-5); }
 .escalate__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 
@@ -869,7 +904,6 @@ main {
   font-size: 20px;
 }
 .footer__note { margin-bottom: var(--space-2); font-size: 14px; color: rgba(255,255,255,.84); max-width: 62ch; }
-.footer__note--muted { color: rgba(255,255,255,.6); font-size: 13px; }
 .footer a { color: var(--gold); }
 
 /* ---------- Bottom tab bar (mobile) --------------------------------------- */
@@ -887,6 +921,7 @@ main {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -900,11 +935,25 @@ main {
   font-weight: 600;
   font-size: 11px;
   letter-spacing: var(--track-ui);
-  transition: color 200ms ease, background-color 200ms ease;
+}
+/* Mirrors the desktop rail's left-border indicator, just rotated onto the
+   top edge — the same "you are here" mark in both nav presentations. */
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 28px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 0 0 3px 3px;
+  background: var(--gold-line);
+  opacity: 0;
 }
 .tab .icon { width: 22px; height: 22px; }
 .tab.is-active { color: var(--navy); }
 .tab.is-active .icon { color: var(--gold-ink); }
+.tab.is-active::before { opacity: 1; }
 .tab:active { background: var(--sunken); }
 
 /* ---------- Scroll reveal ------------------------------------------------- */
@@ -963,7 +1012,9 @@ main {
     border-left: 2px solid var(--hairline);
   }
   .rail__link {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     margin-left: -2px;
     padding: var(--space-2) var(--space-4);
     border-left: 2px solid transparent;
@@ -973,10 +1024,11 @@ main {
     font-size: 15px;
     letter-spacing: var(--track-ui);
     color: var(--ink-soft);
-    transition: color 200ms ease, border-color 200ms ease;
   }
-  .rail__link:hover { color: var(--navy); }
+  .rail__link .icon { color: var(--ink-mute); }
+  .rail__link:hover { color: var(--navy); padding-left: calc(var(--space-4) + 3px); }
   .rail__link.is-active { color: var(--navy); font-weight: 600; border-left-color: var(--gold-line); }
+  .rail__link.is-active .icon { color: var(--gold-ink); }
 
   .hero__inner { padding-block: var(--space-6) var(--space-8); }
 
@@ -999,6 +1051,19 @@ main {
 
 @media (min-width: 1240px) {
   main { grid-template-columns: 220px minmax(0, 1fr); }
+}
+
+/* Past 1440px the fixed 1240px shell was leaving a wide, empty gutter next
+   to the rail — this lets the whole layout (rail, cards, campus/FAQ grids)
+   claim more of a large monitor instead of floating in the middle of it.
+   Single-column reading content (steps, answer, dress code) stays capped at
+   --measure regardless — width alone shouldn't stretch a line of prose. */
+@media (min-width: 1440px) {
+  :root {
+    --shell: var(--shell-wide);
+    --measure: 72ch;
+  }
+  main { grid-template-columns: 260px minmax(0, 1fr); }
 }
 
 /* ==========================================================================

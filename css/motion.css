@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AUF EnrollFlow Assist — motion layer
+   AUF Enrollment Assistance — motion layer
 
    Loaded after styles.css. Presentation only: delete this file and the page
    still reads and works, it just stops moving. Nothing here changes a colour,
@@ -106,7 +106,8 @@
 .dirlink:active,
 .step__done:active { transform: scale(.985); transition-duration: 60ms; }
 
-.btn[disabled]:hover { transform: none; }
+.btn[disabled]:hover,
+.btn[aria-disabled="true"]:hover { transform: none; }
 
 /* Submitted with nothing typed. app.js adds the class and removes it when the
    animation ends; focus moves to the field regardless, so the shake is never
@@ -121,7 +122,12 @@
    ------------------------------------------------------------------------ */
 
 .step__caret,
-.faq__caret { transition: transform var(--dur-base) var(--ease-emphasized); }
+.faq__caret {
+  transition:
+    transform var(--dur-base) var(--ease-emphasized),
+    color var(--dur-base) var(--ease-emphasized),
+    margin-inline-start var(--dur-fast) var(--ease-out-quint);
+}
 
 .step[open] > .step__body,
 .faq[open] > .faq__a { animation: fade-up var(--dur-slow) var(--ease-emphasized) both; }
@@ -151,6 +157,10 @@
 
 .answer { animation: fade-up var(--dur-slow) var(--ease-out-expo) both; }
 
+/* Same treatment for the assistant's status chip the first time it appears —
+   it would otherwise just snap into place under the search field. */
+.modelstate { animation: fade-up var(--dur-base) var(--ease-out-expo) both; }
+
 /* Waiting on the model: bars in the shape of the answer that is coming. A
    blank pause reads as a page that has stalled. */
 .answer__skeleton {
@@ -174,8 +184,16 @@
 .rail__link {
   transition:
     color var(--dur-base) var(--ease-emphasized),
-    border-color var(--dur-base) var(--ease-emphasized);
+    border-color var(--dur-base) var(--ease-emphasized),
+    padding-left var(--dur-fast) var(--ease-out-quint);
 }
+.rail__link .icon { transition: color var(--dur-base) var(--ease-emphasized); }
+
+.campusmap__dot { transition: transform var(--dur-fast) var(--ease-out-quint); }
+
+.tab { transition: color 200ms ease, background-color 200ms ease; }
+.tab .icon { transition: color 200ms ease; }
+.tab::before { transition: opacity var(--dur-base) var(--ease-emphasized); }
 
 /* ==========================================================================
    Reduced motion

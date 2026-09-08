@@ -1,5 +1,5 @@
 /**
- * Single source of content for EnrollFlow Assist.
+ * Single source of content for AUF Enrollment Assistance.
  *
  * PASSAGE is deliberately prose, not a table: MobileBERT QnA extracts an answer
  * span out of natural text, so the passage the model reads is the same material
@@ -30,26 +30,38 @@ export const BUILDINGS = [
       'AUF Cashier Accounting Office — Ground Floor, beside the Chapel',
     ],
     photo: 'assets/auf-angeleshall.jpg',
+    photoWidth: 800,
+    photoHeight: 600,
     x: null,
     y: null,
   },
   {
     id: 'library-commons',
     name: 'University Library Building',
+    shortName: 'Library',
     aka: 'Learning Commons, 2nd Floor',
     mapQuery: 'University Library, Angeles University Foundation, Angeles City, Pampanga',
-    rooms: ['Learning Commons — 2nd Floor'],
+    // No separate rooms list here — the Learning Commons is the whole story,
+    // and it is already named in `aka` right above. A one-item list here just
+    // repeated that line.
+    rooms: [],
     photo: 'assets/auf-library.jpg',
+    photoWidth: 397,
+    photoHeight: 300,
     x: null,
     y: null,
   },
   {
     id: 'college-office',
-    name: 'Your college office',
-    aka: 'for example, the College of Computer Studies',
-    mapQuery: 'Angeles University Foundation, Angeles City, Pampanga',
+    name: 'Emmanuel Y. Angeles Center for Learning and Innovation (EYACLI)',
+    shortName: 'EYACLI',
+    aka: 'College offices building',
+    mapQuery:
+      'Emmanuel Y. Angeles Center for Learning and Innovation, Angeles University Foundation, Angeles City, Pampanga',
     rooms: ['Ask at your own college — each one issues its own registration form'],
     photo: 'assets/auf-office.jpg',
+    photoWidth: 800,
+    photoHeight: 533,
     x: null,
     y: null,
   },
@@ -112,8 +124,8 @@ export const STEPS = [
     number: '6',
     title: 'Registration Form',
     detail:
-      'Claim your registration form at your respective college office, for example the College of Computer Studies.',
-    location: 'Your respective college office',
+      'Claim your registration form at your respective college office inside EYACLI, for example the College of Computer Studies.',
+    location: 'Your respective college office, EYACLI',
     buildingId: 'college-office',
   },
   {
@@ -180,7 +192,7 @@ export const FAQS = [
   {
     question: 'Where do I claim my registration form?',
     answer:
-      'At your respective college office — for example, the College of Computer Studies.',
+      'At your respective college office inside the Emmanuel Y. Angeles Center for Learning and Innovation (EYACLI) — for example, the College of Computer Studies.',
   },
   {
     question: 'What am I not allowed to wear on campus?',
@@ -204,6 +216,6 @@ export const PASSAGE = [
   'Step 2 is document submission, where the student submits a PSA Birth Certificate, a printed GSPIS, and Form 138 or SF10 inside a long brown envelope at the Office of the University Registrar and Admissions in Room A-203 on the 2nd Floor of Angeles Hall, also called the Administration Building.',
   'Step 3 is payment, where the student settles the enrollment fees at the AUF Cashier Accounting Office on the Ground Floor of Angeles Hall, beside the Chapel.',
   'Steps 4, 5, and 7 cover the student ID, the AUF student email account, the medical examination, and the school uniforms, and they are handled together at the Learning Commons on the 2nd Floor of the University Library Building.',
-  'Step 6 is the registration form, which the student claims at their respective college office, for example the College of Computer Studies.',
+  'Step 6 is the registration form, which the student claims at their respective college office inside the Emmanuel Y. Angeles Center for Learning and Innovation, or EYACLI, for example the College of Computer Studies.',
   'The official campus dress code strictly prohibits students from wearing sleeveless tops, crop tops, muscle shirts, spaghetti straps, and shorts on campus.',
 ].join(' ');

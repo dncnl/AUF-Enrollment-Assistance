@@ -7,6 +7,11 @@ docs/
 .git/
 .gitignore
 
+# The full-resolution source photos. Kept in the repo so the site's images can
+# be re-cut at any size later, but nothing on the page ever requests them and
+# they are ~10 MB — they have no business in a deployment.
+assets/originals/
+
 # scripts/ is NOT excluded: if you use the build-time model fetch
 # (docs/mobilebert-setup.md §7 option A), Vercel needs fetch-model.sh present
 # at build time. It costs a few hundred bytes of static hosting.

@@ -3,13 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AUF EnrollFlow Assist</title>
+<title>AUF Enrollment Assistance</title>
 <meta name="description" content="Ask a question about the Angeles University Foundation new student enrollment process and get the answer straight from the official guidelines.">
 <meta name="theme-color" content="#0c2340">
-<link rel="icon" href="assets/auf-logo.png">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon-180.png">
+
+<!-- Shared student to student, mostly over Messenger — without these the link
+     arrives as a bare URL. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="AUF Enrollment Assistance">
+<meta property="og:description" content="Seven steps, four buildings, one place to ask. Answers straight from the official AUF new student enrollment guidelines.">
+<meta property="og:image" content="assets/og-image.jpg">
+<meta property="og:image:alt" content="Angeles Hall at Angeles University Foundation.">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=League+Spartan:wght@400;500;600;700&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<!-- Only the weights the stylesheet actually uses: Fraunces 600 roman and
+     italic (the hero's "enroll" accent needs the italic axis), League
+     Spartan 500/600/700, Poppins 400/500. -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&family=League+Spartan:wght@500;600;700&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/motion.css">
 </head>
@@ -23,15 +37,14 @@
 
   <div class="hero__inner">
     <a class="brand" href="#home">
-      <img class="brand__seal" src="assets/auf-logo.png" alt="" width="44" height="44">
+      <img class="brand__seal" src="assets/auf-seal-96.png" alt="" width="40" height="40">
       <span class="brand__text">
         <span class="brand__name">Angeles University Foundation</span>
         <span class="brand__sub">Enrollment Service</span>
       </span>
     </a>
 
-    <p class="hero__eyebrow">Enrollment assistant</p>
-    <h1 class="hero__title">How can we help you enroll?</h1>
+    <h1 class="hero__title">How can we help you <em>enroll</em>?</h1>
     <p class="hero__sub">Seven steps, four buildings, one place to ask. Answers come straight from the official AUF guidelines.</p>
 
     <form class="search" id="ask-form" role="search" autocomplete="off">
@@ -56,7 +69,7 @@
   </div>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1">
 
   <!-- Desktop-only section rail. The bottom tab bar covers mobile. -->
   <nav class="rail" aria-label="Sections">
@@ -68,11 +81,16 @@
     <!-- Answer surface. Populated by app.js; hidden until the first question. -->
     <section class="section" id="assist" aria-labelledby="assist-heading">
       <h2 class="sr-only" id="assist-heading">Ask Assist answer</h2>
-      <div class="answer" id="answer" aria-live="polite" hidden></div>
+      <!-- The live region is this wrapper, not the card. The card starts
+           hidden, and a region that is not rendered when its content changes
+           does not get announced — so the announcer has to be the element
+           that is always present. -->
+      <div id="answer-live" aria-live="polite">
+        <div class="answer" id="answer" hidden></div>
+      </div>
     </section>
 
     <section class="section" id="guide" aria-labelledby="guide-heading">
-      <p class="section__eyebrow">Your enrollment</p>
       <h2 class="section__title" id="guide-heading">Seven steps, in order</h2>
       <p class="section__lede">Work down the list. Tick each step as you finish it — the next one you need is always highlighted.</p>
 
@@ -81,14 +99,12 @@
     </section>
 
     <section class="section" id="campus" aria-labelledby="campus-heading">
-      <p class="section__eyebrow">Where to go</p>
       <h2 class="section__title" id="campus-heading">Finding your way around campus</h2>
       <p class="section__lede">Every office you need during enrollment. Directions open in your phone’s maps app.</p>
       <div id="campus-body"></div>
     </section>
 
     <section class="section" id="dress-code" aria-labelledby="dress-heading">
-      <p class="section__eyebrow">Before you go</p>
       <h2 class="section__title" id="dress-heading">Dress code</h2>
       <p class="dress__intro" id="dress-intro"></p>
       <p class="dress__label" id="dress-label">Strictly prohibited on campus</p>
@@ -97,7 +113,6 @@
     </section>
 
     <section class="section" id="faqs" aria-labelledby="faqs-heading">
-      <p class="section__eyebrow">Quick answers</p>
       <h2 class="section__title" id="faqs-heading">FAQs</h2>
       <div class="faqs" id="faq-list"></div>
     </section>
@@ -105,10 +120,9 @@
     <!-- Escalation: what to do when this page cannot answer -->
     <section class="section" id="help" aria-labelledby="help-heading">
       <div class="escalate">
-        <p class="section__eyebrow">Beyond the guidelines</p>
         <h2 class="escalate__title" id="help-heading">Still stuck?</h2>
         <p class="escalate__text">
-          EnrollFlow Assist only answers from the official AUF New Student Enrollment
+          AUF Enrollment Assistance only answers from the official AUF New Student Enrollment
           Guidelines. For anything outside them — deadlines, scholarships, or your own
           records — ask the office handling that step, or check the university site.
         </p>
@@ -125,14 +139,11 @@
 <footer class="footer">
   <div class="footer__inner">
     <div>
-      <p class="footer__title">AUF EnrollFlow Assist</p>
+      <p class="footer__title">AUF Enrollment Assistance</p>
       <p class="footer__note">
         Answers are extracted from the official AUF New Student Enrollment Guidelines.
         For anything not covered here, visit
         <a href="https://www.auf.edu.ph/" target="_blank" rel="noopener">auf.edu.ph</a>.
-      </p>
-      <p class="footer__note footer__note--muted">
-        PTF50 — Professional Track 5: Web-Based AI Development · Applied Activity: Pre-Trained Models
       </p>
     </div>
 
