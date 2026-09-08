@@ -224,7 +224,8 @@ function renderNav() {
   ).join('');
 
   document.getElementById('rail').innerHTML = NAV.map(
-    (item) => `<li><a class="rail__link" href="${item.href}">${escapeHtml(item.label)}</a></li>`,
+    (item) =>
+      `<li><a class="rail__link" href="${item.href}">${icon(item.icon)}<span>${escapeHtml(item.label)}</span></a></li>`,
   ).join('');
 }
 
