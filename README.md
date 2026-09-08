@@ -1,14 +1,14 @@
-# AUF Enrollment Assist
+# AUF Enrollment Assistance
 
 A browser-based enrollment assistant for Angeles University Foundation, built for **PTF50 — Professional Track 5: Web-Based AI Development** (Applied Activity: Pre-Trained Models).
 
-## Concept 1: AUF Enrollment Assist
+## Concept 1: AUF Enrollment Assistance
 
 **Chosen model:** MobileBERT QnA (`@tensorflow-models/qna`)
 **Reads:** a text passage + a typed question
 **Produces:** the best matching answer span extracted from that passage
 
-During AUF's enrollment period, new students have to navigate a multi-step process spread across several offices and buildings, with no single place to quickly ask "where do I go next?" or "what do I need?" EnrollFlow Assist answers that by pre-loading the official AUF enrollment guidelines as context and letting MobileBERT QnA pull out the exact answer span for whatever a student types.
+During AUF's enrollment period, new students have to navigate a multi-step process spread across several offices and buildings, with no single place to quickly ask "where do I go next?" or "what do I need?" AUF Enrollment Assistance answers that by pre-loading the official AUF enrollment guidelines as context and letting MobileBERT QnA pull out the exact answer span for whatever a student types.
 
 ### Context passage (the data fed to the model)
 
@@ -26,7 +26,7 @@ The app pre-loads the official **AUF New Student Enrollment Guidelines** as its 
 
 ### Planned app flow
 
-1. Student opens the EnrollFlow Assist page and sees a search bar under "How can we help you enroll?"
+1. Student opens the AUF Enrollment Assistance page and sees a search bar under "How can we help you enroll?"
 2. Student types a question (or taps a quick FAQ chip, e.g. "How much?", "Is the office open on Saturday?") and hits **Ask Assist**.
 3. MobileBERT QnA runs in-browser against the pre-loaded enrollment guidelines passage and returns the answer span, shown with its confidence and the source sentence highlighted inside the passage.
 4. The app displays the extracted answer, plus a reference "Procedure for enrolling" step cards and a "Dress Code" panel for quick browsing without needing to ask.

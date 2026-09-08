@@ -60,17 +60,29 @@ export function directionsLink(building, { compact = false } = {}) {
   );
 }
 
+/**
+ * WebP with the JPEG as the fallback source. Every photo ships as both, so the
+ * .webp path is derived rather than carried in data.js. The wrapper's
+ * aspect-ratio already reserves the space; width/height carry the file's real
+ * intrinsic size so nothing depends on the CSS having loaded first.
+ */
+function photoMarkup({ photo, photoWidth, photoHeight }) {
+  const webp = photo.replace(/\.jpe?g$/i, '.webp');
+  return `
+    <div class="place__photo">
+      <picture>
+        <source srcset="${escapeHtml(webp)}" type="image/webp">
+        <img src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async"
+             width="${escapeHtml(photoWidth)}" height="${escapeHtml(photoHeight)}">
+      </picture>
+    </div>`;
+}
+
 function placeCard(building) {
   const trip = tripFor(building.id);
   return `
     <li class="place" id="place-${escapeHtml(building.id)}">
-      ${
-        building.photo
-          ? `<div class="place__photo">
-               <img src="${escapeHtml(building.photo)}" alt="" loading="lazy">
-             </div>`
-          : ''
-      }
+      ${building.photo ? photoMarkup(building) : ''}
       <div class="place__head">
         <h3 class="place__name">${escapeHtml(building.name)}</h3>
         <p class="place__aka">${escapeHtml(building.aka)}</p>

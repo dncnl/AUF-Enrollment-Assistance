@@ -1,5 +1,5 @@
 /**
- * Single source of content for EnrollFlow Assist.
+ * Single source of content for AUF Enrollment Assistance.
  *
  * PASSAGE is deliberately prose, not a table: MobileBERT QnA extracts an answer
  * span out of natural text, so the passage the model reads is the same material
@@ -30,6 +30,8 @@ export const BUILDINGS = [
       'AUF Cashier Accounting Office — Ground Floor, beside the Chapel',
     ],
     photo: 'assets/auf-angeleshall.jpg',
+    photoWidth: 800,
+    photoHeight: 600,
     x: null,
     y: null,
   },
@@ -44,6 +46,8 @@ export const BUILDINGS = [
     // repeated that line.
     rooms: [],
     photo: 'assets/auf-library.jpg',
+    photoWidth: 397,
+    photoHeight: 300,
     x: null,
     y: null,
   },
@@ -56,6 +60,8 @@ export const BUILDINGS = [
       'Emmanuel Y. Angeles Center for Learning and Innovation, Angeles University Foundation, Angeles City, Pampanga',
     rooms: ['Ask at your own college — each one issues its own registration form'],
     photo: 'assets/auf-office.jpg',
+    photoWidth: 800,
+    photoHeight: 533,
     x: null,
     y: null,
   },

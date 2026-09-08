@@ -201,6 +201,9 @@ const VOCAB_REMOTE =
 
 export const MODEL_INFO = {
   name: 'MobileBERT QnA',
+  /** Printed under every answer. Now that the model really is doing the
+      extracting, this stops saying 'keyword matching'. */
+  engine: 'MobileBERT QnA',
   downloadMB: 102,
   /** Now true: the weights really are a ~102 MB download on first ask. */
   needsDownload: true,

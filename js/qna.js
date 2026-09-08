@@ -26,6 +26,13 @@
  */
 export const MODEL_INFO = {
   name: 'MobileBERT QnA',
+  /**
+   * What is actually answering, printed under every answer. The stub is not
+   * MobileBERT and the card must not say it is — the whole app rests on the
+   * student being able to trust what it tells them. This becomes
+   * 'MobileBERT QnA' in the same edit that replaces answer().
+   */
+  engine: 'keyword matching',
   /** Measured: 101.5 MB across 26 files. Rounded up so the figure on screen
       is never smaller than what the student actually spends. */
   downloadMB: 102,

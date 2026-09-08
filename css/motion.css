@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AUF EnrollFlow Assist — motion layer
+   AUF Enrollment Assistance — motion layer
 
    Loaded after styles.css. Presentation only: delete this file and the page
    still reads and works, it just stops moving. Nothing here changes a colour,
@@ -106,7 +106,8 @@
 .dirlink:active,
 .step__done:active { transform: scale(.985); transition-duration: 60ms; }
 
-.btn[disabled]:hover { transform: none; }
+.btn[disabled]:hover,
+.btn[aria-disabled="true"]:hover { transform: none; }
 
 /* Submitted with nothing typed. app.js adds the class and removes it when the
    animation ends; focus moves to the field regardless, so the shake is never
