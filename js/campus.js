@@ -55,6 +55,13 @@ function placeCard(building) {
   const trip = tripFor(building.id);
   return `
     <li class="place" id="place-${escapeHtml(building.id)}">
+      ${
+        building.photo
+          ? `<div class="place__photo">
+               <img src="${escapeHtml(building.photo)}" alt="" loading="lazy">
+             </div>`
+          : ''
+      }
       <div class="place__head">
         <h3 class="place__name">${escapeHtml(building.name)}</h3>
         <p class="place__aka">${escapeHtml(building.aka)}</p>
