@@ -207,7 +207,7 @@ function renderDressCode() {
   document.getElementById('dress-intro').textContent = DRESS_CODE.intro;
   document.getElementById('dress-note').textContent = DRESS_CODE.note;
   document.getElementById('dress-list').innerHTML = DRESS_CODE.prohibited
-    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .map((item) => `<li>${icon('close', 'icon icon--sm')}<span>${escapeHtml(item)}</span></li>`)
     .join('');
 }
 
@@ -258,14 +258,13 @@ function renderNav() {
 
 let modelPromise = null;
 
+/**
+ * Hidden in the hero by design — the status text (download size, "ready",
+ * failures) reads as UI clutter above the fold. Kept as a no-op rather than
+ * removed so the model-loading logic that calls it needs no changes.
+ */
 function setModelState(kind, text) {
-  if (!text) {
-    modelStateEl.hidden = true;
-    return;
-  }
-  modelStateEl.hidden = false;
-  modelStateEl.className = `modelstate is-${kind}`;
-  modelStateEl.innerHTML = `<span class="modelstate__dot" aria-hidden="true"></span><span>${escapeHtml(text)}</span>`;
+  modelStateEl.hidden = true;
 }
 
 function onModelProgress(fraction) {

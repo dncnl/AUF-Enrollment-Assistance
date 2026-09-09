@@ -21,6 +21,10 @@ models/
 # the reason script-src can stay 'self'. They belong in git, so nothing here
 # excludes vendor/.
 
+# Local-only working docs (setup notes, PTF50 answers, pitch material) —
+# not part of the deployed app. Keep them out of the repo entirely.
+docs/
+
 # OS / editor noise
 .DS_Store
 Thumbs.db

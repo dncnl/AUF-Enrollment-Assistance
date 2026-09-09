@@ -31,6 +31,7 @@ const PATHS = {
     '<path d="M14 4h6v6M20 4l-8.5 8.5"/><path d="M18 14.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4.5"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.75"/><path d="M15.6 15.6 21 21"/>',
   warning: '<path d="M12 4 2.6 20.2h18.8z"/><path d="M12 10.2v4.2"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
+  close: '<path d="m6 6 12 12M18 6 6 18"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.5 3.6 5.6 3.6 9S14.4 18.5 12 21c-2.4-2.5-3.6-5.6-3.6-9S9.6 5.5 12 3z"/>',
 };
 

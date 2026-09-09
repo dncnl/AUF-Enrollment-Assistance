@@ -1,24 +1,21 @@
 /**
  * The model seam.
  *
- * Today this is a keyword-overlap stub so the whole answer UI — loading,
- * answer, no-match, error — is built and exercised before the model lands.
- * When MobileBERT QnA is wired in, only the bodies of `warmup()` and
- * `answer()` change; `app.js` never learns which one produced the result.
+ * This calls the real @tensorflow-models/qna MobileBERT model, self-hosted
+ * from models/mobilebert/ (see docs/mobilebert-setup.md for the full
+ * procedure this implements). `app.js` never learns how the answer was
+ * produced — it only depends on the shape below.
  *
  * The return shape matches @tensorflow-models/qna's findAnswers() entries:
  *   { text, score, startIndex, endIndex }
- *
- * To swap in the real model: docs/mobilebert-setup.md has the whole procedure,
- * with the finished replacements for warmup() and answer(). Two corrections to
- * what this comment used to say, both verified against the published bundle:
- *
- *   - qna.load() takes no onProgress. It does not forward LoadOptions to
- *     loadGraphModel, so progress has to come from prefetching the shards.
- *   - findAnswers() returns score as startLogit + endLogit — unbounded, with a
- *     no-answer threshold of 4.398. Returning it unmapped would make app.js
- *     print "Confidence 1650%" and silently stop showing the caveat.
  */
+
+/** Where the self-hosted weights live, relative to the site root. */
+const MODEL_BASE = 'models/mobilebert/';
+
+/** The one URL the tokenizer hardcodes. See docs/mobilebert-setup.md §4. */
+const VOCAB_REMOTE =
+  'https://tfhub.dev/tensorflow/tfjs-model/mobilebert/1/processed_vocab.json?tfjs-format=file';
 
 /**
  * What the UI tells the student before it spends their mobile data. Kept here
@@ -26,119 +23,137 @@
  */
 export const MODEL_INFO = {
   name: 'MobileBERT QnA',
-  /**
-   * What is actually answering, printed under every answer. The stub is not
-   * MobileBERT and the card must not say it is — the whole app rests on the
-   * student being able to trust what it tells them. This becomes
-   * 'MobileBERT QnA' in the same edit that replaces answer().
-   */
-  engine: 'keyword matching',
+  /** What is actually answering, printed under every answer. */
+  engine: 'MobileBERT QnA',
   /** Measured: 101.5 MB across 26 files. Rounded up so the figure on screen
       is never smaller than what the student actually spends. */
   downloadMB: 102,
-  /** The stub downloads nothing, so the UI can skip the data warning today. */
-  needsDownload: false,
+  /** The weights really are a ~102 MB download on first ask. */
+  needsDownload: true,
 };
 
-/** Below this score we show "no confident match" instead of guessing. */
-const CONFIDENCE_FLOOR = 0.18;
+/**
+ * The model's own no-answer threshold, straight from the published bundle. A
+ * raw score below this is the model saying "not in this passage" — not a
+ * weak answer.
+ */
+const NO_ANSWER_THRESHOLD = 4.3980759382247925;
+
+/** The tokenizer throws above this; we would rather explain than crash. */
+const MAX_QUERY_TOKENS = 64;
 
 /**
- * Above the floor but below this, the answer is shown with a caveat rather
- * than as a flat statement of fact.
+ * Above the model's no-answer floor but below this (on the normalised 0–1
+ * scale), the answer is shown with a caveat rather than as a flat statement
+ * of fact.
  */
 export const LOW_CONFIDENCE = 0.3;
 
-/** Words too common to carry meaning when matching a question to a sentence. */
-const STOPWORDS = new Set([
-  'a', 'am', 'an', 'and', 'any', 'are', 'as', 'at', 'be', 'been', 'by', 'can',
-  'did', 'do', 'does', 'for', 'from', 'get', 'go', 'has', 'have', 'how', 'i',
-  'if', 'in', 'into', 'is', 'it', 'its', 'me', 'much', 'must', 'my', 'need',
-  'allowed', 'not', 'of', 'on', 'or', 'should', 'that', 'the', 'their',
-  'there', 'they', 'this',
-  'to', 'was', 'what', 'when', 'where', 'which', 'who', 'why', 'will', 'with',
-  'you', 'your',
-]);
+let model = null;
 
 /**
- * Prepare the answering engine. Near-instant for the stub; becomes a ~102 MB
- * qna.load() later, which is why callers must already treat it as slow and
- * failable. See docs/mobilebert-setup.md for the swap.
+ * Point the tokenizer's hardcoded vocab URL at our own copy, for the duration
+ * of the load and no longer. Restores the original fetch even if load throws.
+ */
+async function withVocabShim(fn) {
+  const original = window.fetch;
+  window.fetch = (input, init) => {
+    const url = typeof input === 'string' ? input : input?.url;
+    if (url === VOCAB_REMOTE) {
+      return original(`${MODEL_BASE}processed_vocab.json`, init);
+    }
+    return original(input, init);
+  };
+  try {
+    return await fn();
+  } finally {
+    window.fetch = original;
+  }
+}
+
+/**
+ * Pull every weight shard through the browser cache first, reporting real
+ * progress as we go.
+ *
+ * qna.load() takes no onProgress callback — it does not forward LoadOptions to
+ * loadGraphModel. So rather than leave the student watching an indeterminate
+ * spinner for 102 MB, we fetch the shards ourselves, count the bytes, and let
+ * the subsequent load() read them straight out of the HTTP cache.
+ */
+async function prefetchWeights(onProgress) {
+  const manifestUrl = `${MODEL_BASE}model.json`;
+  const manifest = await fetch(manifestUrl).then((r) => {
+    if (!r.ok) throw new Error(`model.json: HTTP ${r.status}`);
+    return r.json();
+  });
+
+  const paths = manifest.weightsManifest.flatMap((group) => group.paths);
+  let done = 0;
+  for (const path of paths) {
+    await fetch(MODEL_BASE + path);
+    done += 1;
+    onProgress?.(done / paths.length);
+  }
+}
+
+/**
+ * Load the model. Safe to call repeatedly — only the first call does work.
  *
  * @param {(fraction: number) => void} [onProgress] Called with 0..1 as the
- *   model downloads. The stub reports a single completed beat so the status
- *   chip is exercised; the real implementation forwards tf's onProgress.
+ *   model downloads.
  */
 export async function warmup(onProgress) {
+  if (model) return true;
+
+  await prefetchWeights(onProgress);
+
+  model = await withVocabShim(() =>
+    qna.load({ modelUrl: `${MODEL_BASE}model.json`, fromTFHub: false }),
+  );
+
   onProgress?.(1);
   return true;
 }
 
 /**
  * Find the best answer span for `question` inside `passage`.
- * Resolves to null when nothing in the passage is a confident match.
+ * Resolves to null when the model says the answer is not in the passage.
  */
 export async function answer(question, passage) {
-  const terms = tokenize(question).filter((t) => !STOPWORDS.has(t));
-  if (terms.length === 0) return null;
+  if (!model) throw new Error('warmup() must resolve before answer()');
 
-  // Keep each sentence's offsets so the UI can highlight it inside the passage.
-  const sentences = splitSentences(passage);
+  question = expandAbbreviations(question);
 
-  let best = null;
-  for (const sentence of sentences) {
-    const words = new Set(tokenize(sentence.text));
-    let hits = 0;
-    for (const term of terms) {
-      if (words.has(term) || [...words].some((w) => w.startsWith(term) || term.startsWith(w))) {
-        hits += 1;
-      }
-    }
-    if (hits === 0) continue;
+  // A word-piece token is shorter than a word, so this is deliberately
+  // conservative — it is a guard against a throw, not a precise count.
+  if (question.split(/\s+/).length > MAX_QUERY_TOKENS / 2) return null;
 
-    // One incidental word in common is coincidence, not an answer: a question
-    // carrying several content words has to match on more than one of them.
-    if (terms.length >= 3 && hits < 2) continue;
+  const [best] = await model.findAnswers(question, passage);
+  if (!best || best.score < NO_ANSWER_THRESHOLD) return null;
 
-    // Overlap normalised by question length, nudged down for very long
-    // sentences so a sprawling one cannot win on sheer surface area.
-    const score = (hits / terms.length) * (1 - Math.min(words.size, 60) / 240);
-    if (!best || score > best.score) {
-      best = {
-        text: sentence.text,
-        score,
-        startIndex: sentence.startIndex,
-        endIndex: sentence.endIndex,
-      };
-    }
-  }
-
-  // A beat of latency so the loading state is real rather than a flash.
-  await new Promise((resolve) => setTimeout(resolve, 350));
-
-  if (!best || best.score < CONFIDENCE_FLOOR) return null;
-  return best;
+  return { ...best, score: normaliseScore(best.score) };
 }
 
-function tokenize(text) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, ' ')
-    .split(/\s+/)
-    .filter((word) => word.length > 1);
+/**
+ * A few common student-typed shorthands the model doesn't reliably resolve to
+ * what the passage actually says. Expanding them before asking measurably
+ * improves matches on short, casual questions — validated against the live
+ * model, not guessed. Kept to one word for now; not a general synonym system.
+ */
+function expandAbbreviations(question) {
+  return question.replace(/\bid\b/gi, 'school ID');
 }
 
-/** Split into sentences, carrying each one's offset within the passage. */
-function splitSentences(passage) {
-  const sentences = [];
-  const pattern = /[^.!?]+[.!?]*/g;
-  let match;
-  while ((match = pattern.exec(passage)) !== null) {
-    const raw = match[0];
-    const text = raw.trim();
-    if (!text) continue;
-    const startIndex = match.index + raw.indexOf(text[0]);
-    sentences.push({ text, startIndex, endIndex: startIndex + text.length });
-  }
-  return sentences;
+/**
+ * Map the model's raw logit sum onto the 0–1 range app.js renders as a
+ * percentage. See docs/mobilebert-setup.md §6 — this is a monotonic display
+ * mapping, not a calibrated probability.
+ *
+ *   raw 4.4 (the floor) → 0.23   shown with the "may not be what you meant" caveat
+ *   raw 8               → 0.50
+ *   raw 14              → 0.88
+ *   raw 20              → 0.98
+ */
+function normaliseScore(raw) {
+  return 1 / (1 + Math.exp(-(raw - 8) / 3));
 }

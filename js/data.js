@@ -78,8 +78,7 @@ export const STEPS = [
   {
     number: '1',
     title: 'Online Enlistment',
-    detail:
-      'Enlist in your subjects through the online myAU portal before going to campus.',
+    detail: 'Enlist in your subjects through the online myAU portal before going to campus.',
     location: 'myAU portal — auf.edu.ph',
     buildingId: 'online',
   },
@@ -87,14 +86,15 @@ export const STEPS = [
     number: '2',
     title: 'Document Submission',
     detail:
-      'Submit your PSA Birth Certificate, printed GSPIS, and Form 138 / SF10 inside a long brown envelope.',
+      'Accomplish the General Student Personal Information Sheet (GSPIS) in MyAU, then submit your entrance credentials inside a long brown envelope.',
     location:
       'Office of the University Registrar and Admissions, Room A-203, 2nd Floor, Angeles Hall',
     buildingId: 'angeles-hall',
     bring: [
-      'PSA Birth Certificate',
-      'Printed GSPIS',
-      'Form 138 / SF10',
+      'PSA Birth Certificate (original and 1 photocopy)',
+      '2x2 picture with name (1 copy)',
+      'Printed and signed GSPIS',
+      'Original Form 138 / SF10 (once available)',
       'Long brown envelope',
     ],
   },
@@ -108,15 +108,15 @@ export const STEPS = [
   },
   {
     number: '4',
-    title: 'Student ID Processing',
-    detail: 'Have your photo taken and your student ID processed.',
+    title: 'Student ID & AUF Email',
+    detail: 'Have your school ID processed and your official AUF email account activated.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
     buildingId: 'library-commons',
   },
   {
     number: '5',
-    title: 'AUF Email Account',
-    detail: 'Claim your official AUF student email account.',
+    title: 'Student Medical Form',
+    detail: 'Accomplish the Student Medical Form.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
     buildingId: 'library-commons',
   },
@@ -130,8 +130,8 @@ export const STEPS = [
   },
   {
     number: '7',
-    title: 'Medical Exam & Uniforms',
-    detail: 'Complete your medical examination and order your school uniforms.',
+    title: 'Books, Uniforms & Materials',
+    detail: 'Purchase your books, uniforms, and other materials.',
     location: 'Learning Commons, 2nd Floor, University Library Building',
     buildingId: 'library-commons',
   },
@@ -158,7 +158,11 @@ export const DRESS_CODE = {
     'Sleeveless tops',
     'Crop tops',
     'Muscle shirts',
-    'Spaghetti straps',
+    'Tank tops',
+    'Spaghetti strap tops',
+    'Tube tops',
+    'Pajama tops',
+    'Flimsy tops',
     'Shorts',
   ],
   note:
@@ -169,7 +173,7 @@ export const DRESS_CODE = {
 export const CHIPS = [
   'Where do I submit my documents?',
   'Where do I pay the enrollment fees?',
-  'What am I not allowed to wear?',
+  'What am I not allowed to wear on campus?',
 ];
 
 /** Accordion entries for the FAQs section. */
@@ -177,7 +181,7 @@ export const FAQS = [
   {
     question: 'Where do I submit my enrollment documents?',
     answer:
-      'At the Office of the University Registrar and Admissions, Room A-203, 2nd Floor of Angeles Hall. Bring your PSA Birth Certificate, printed GSPIS, and Form 138 / SF10 in a long brown envelope.',
+      'At the Office of the University Registrar and Admissions, Room A-203, 2nd Floor of Angeles Hall, after accomplishing the GSPIS in MyAU. Bring the original and 1 photocopy of your PSA Birth Certificate, a 2x2 picture with name, a printed and signed GSPIS, and your original Form 138 / SF10 in a long brown envelope.',
   },
   {
     question: 'Where do I pay my enrollment fees?',
@@ -185,9 +189,19 @@ export const FAQS = [
       'At the AUF Cashier Accounting Office on the Ground Floor of Angeles Hall, beside the Chapel.',
   },
   {
-    question: 'Where do I get my student ID, email, and uniform?',
+    question: 'Where do I get my student ID and AUF email account?',
     answer:
-      'Steps 4, 5, and 7 are handled together at the Learning Commons on the 2nd Floor of the University Library Building.',
+      'At the Learning Commons on the 2nd Floor of the University Library Building — this is Step 4.',
+  },
+  {
+    question: 'Where do I accomplish my Student Medical Form?',
+    answer:
+      'At the Learning Commons on the 2nd Floor of the University Library Building — this is Step 5.',
+  },
+  {
+    question: 'Where do I buy my books and uniforms?',
+    answer:
+      'At the Learning Commons on the 2nd Floor of the University Library Building — this is Step 7, done after claiming your registration form.',
   },
   {
     question: 'Where do I claim my registration form?',
@@ -197,12 +211,17 @@ export const FAQS = [
   {
     question: 'What am I not allowed to wear on campus?',
     answer:
-      'Sleeveless tops, crop tops, muscle shirts, spaghetti straps, and shorts are strictly prohibited.',
+      'Sleeveless tops, crop tops, muscle shirts, tank tops, spaghetti strap tops, tube tops, pajama tops, flimsy tops, and shorts are strictly prohibited.',
   },
   {
     question: 'Do I need to enlist online before coming to campus?',
     answer:
       'Yes. Step 1 is online enlistment through the myAU portal at auf.edu.ph, done before you visit any office.',
+  },
+  {
+    question: 'Who do I contact for College of Computer Studies admission concerns?',
+    answer:
+      'Call or text (+63) 961-061-2987, or email ccs@auf.edu.ph or ccs.admissions@auf.edu.ph.',
   },
 ];
 
@@ -212,10 +231,16 @@ export const FAQS = [
  */
 export const PASSAGE = [
   'The Angeles University Foundation new student enrollment process has seven steps.',
-  'Step 1 is online enlistment, which is managed through the online myAU portal at auf.edu.ph.',
-  'Step 2 is document submission, where the student submits a PSA Birth Certificate, a printed GSPIS, and Form 138 or SF10 inside a long brown envelope at the Office of the University Registrar and Admissions in Room A-203 on the 2nd Floor of Angeles Hall, also called the Administration Building.',
-  'Step 3 is payment, where the student settles the enrollment fees at the AUF Cashier Accounting Office on the Ground Floor of Angeles Hall, beside the Chapel.',
-  'Steps 4, 5, and 7 cover the student ID, the AUF student email account, the medical examination, and the school uniforms, and they are handled together at the Learning Commons on the 2nd Floor of the University Library Building.',
-  'Step 6 is the registration form, which the student claims at their respective college office inside the Emmanuel Y. Angeles Center for Learning and Innovation, or EYACLI, for example the College of Computer Studies.',
-  'The official campus dress code strictly prohibits students from wearing sleeveless tops, crop tops, muscle shirts, spaghetti straps, and shorts on campus.',
+  'Step 1 is online enlistment of subjects, checked through the myAU portal at auf.edu.ph.',
+  'Step 2 is document submission, which begins with the accomplishment of the General Student Personal Information Sheet, or GSPIS, in MyAU.',
+  'For document submission, the student submits entrance credential documents inside a long brown envelope at the Office of the University Registrar and Admissions in Room A-203 on the 2nd Floor of Angeles Hall, also called the Administration Building.',
+  'The entrance credential documents for Step 2 are the original and one photocopy of the PSA Birth Certificate, one 2x2 picture with name, a printed and signed copy of the GSPIS, and the original Form 138 or SF10 once available.',
+  'Step 3 is payment of the enrollment fee at the AUF Cashier Accounting Office on the Ground Floor of Angeles Hall, beside the Chapel.',
+  'Step 4 is the processing of the school ID, where the student gets their school ID, and the activation of the AUF email account, both done at the Learning Commons on the 2nd Floor of the University Library Building.',
+  'Step 5 is the accomplishment of the Student Medical Form, also done at the Learning Commons on the 2nd Floor of the University Library Building.',
+  'Step 6 is claiming the registration form, which the student picks up at their respective college office.',
+  'Each college has its own office inside the Emmanuel Y. Angeles Center for Learning and Innovation, or EYACLI, for example the College of Computer Studies.',
+  'Step 7 is purchasing books, uniforms, and other materials at the Learning Commons on the 2nd Floor of the University Library Building.',
+  'The official campus dress code requires appropriate attire such as a t-shirt, polo shirt, blouse, or dress with sleeves and suitable bottoms, and strictly prohibits students from wearing sleeveless tops, crop tops, and shorts on campus.',
+  'For College of Computer Studies admission concerns, the contact number is 0961-061-2987 and the email is ccs@auf.edu.ph.',
 ].join(' ');

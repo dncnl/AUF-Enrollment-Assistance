@@ -1,5 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "sh scripts/fetch-model.sh",
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/(.*)",
@@ -49,6 +51,12 @@
           "key": "Cache-Control",
           "value": "public, max-age=3600, stale-while-revalidate=86400"
         }
+      ]
+    },
+    {
+      "source": "/models/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     }
   ]
